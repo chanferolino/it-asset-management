@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "compound-engineering@every-marketplace": true
+  },
+  "extraKnownMarketplaces": {
+    "every-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "EveryInc/compound-engineering-plugin"
+      }
+    }
+  }
+}
