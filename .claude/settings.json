@@ -2,8 +2,25 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:github.com)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "Bash(pnpm dlx:*)",
       "Bash(pnpm install:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm create:*)",
+      "Bash(pnpm db:generate)",
+      "Bash(pnpm db:push)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx playwright:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Read(//c/Users/Gaming PC/Desktop/Dev/**)",
+      "Bash(cp -r src public \"c:/Users/Gaming PC/Desktop/Dev/it-asset-management/\")",
+      "Bash(cp package.json pnpm-lock.yaml pnpm-workspace.yaml postcss.config.mjs next.config.ts eslint.config.mjs tsconfig.json \"c:/Users/Gaming PC/Desktop/Dev/it-asset-management/\")",
+      "Bash(pnpm config:*)"
     ]
   },
   "enabledPlugins": {

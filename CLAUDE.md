@@ -10,18 +10,17 @@ Detailed specs live in `.claude/rules/`:
 - `structure.md` — project folder structure
 - `commands.md` — available scripts
 - `conventions.md` — coding conventions
-
-<!-- Add more rule files as needed for your project:
-- `database.md` — database schema conventions
-- `features.md` — feature specifications
-- `layout.md` — UI layout spec
+- `database.md` — Prisma schema conventions
 - `components.md` — component patterns
--->
 
 ## Testing
 
 Every new feature must include tests before it is considered complete:
 
-- **Integration tests** for server actions and backend logic
-- **Component tests** for interactive components
-- **E2E tests** for critical user flows
+- **Integration tests (Vitest)** for server actions and backend logic — test against a real test database
+- **Frontend component tests (Vitest + Testing Library)** for interactive components
+- **E2E tests (Playwright)** for critical user flows
+
+Run tests with:
+- `pnpm test` — run Vitest (unit + integration)
+- `pnpm test:e2e` — run Playwright E2E tests

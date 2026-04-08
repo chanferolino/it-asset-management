@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.github
+.claude
+.agents
+.env
+.env.*
+playwright-report
+test-results
+tests
+*.md
+!README.md
