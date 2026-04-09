@@ -3,6 +3,7 @@
 - Use `cn()` for composing Tailwind classes
 - Use shadcn/ui components as the base for all UI
 - Server Components by default; `'use client'` only when needed
+- All frontend design work must follow the glassmorphism design system defined in `.agents/design.md`
 - Prisma for all database access
 - Validate inputs at API boundaries with Zod
 
