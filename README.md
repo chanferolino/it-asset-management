@@ -113,6 +113,50 @@ tests/
   helpers/          # Test utilities
 ```
 
+## Deploying to Vercel
+
+### 1. Create a Prisma Postgres database
+
+1. Go to [Vercel](https://vercel.com) and create a new project linked to your repo
+2. In the Vercel dashboard, go to **Storage** → **Create Database** → **Prisma Postgres**
+3. Connect it to your project — this auto-adds `DATABASE_URL`, `POSTGRES_URL`, and `PRISMA_DATABASE_URL` env vars
+
+### 2. Set environment variables
+
+Go to **Settings** → **Environment Variables** and add:
+
+| Variable | Value |
+|----------|-------|
+| `AUTH_SECRET` | Generate with `openssl rand -base64 32` |
+| `AUTH_URL` | Your Vercel domain (e.g. `https://your-app.vercel.app`) |
+| `NEXTAUTH_SECRET` | Same value as `AUTH_SECRET` |
+| `NEXTAUTH_URL` | Same value as `AUTH_URL` |
+| `AUTH_TRUST_HOST` | `true` |
+
+### 3. Run migrations against the production database
+
+Get the direct database connection string from Vercel Storage and run:
+
+```bash
+DATABASE_URL="your-direct-connection-string" npx prisma migrate deploy
+```
+
+### 4. Seed the production database
+
+```bash
+DATABASE_URL="your-direct-connection-string" pnpm db:seed
+```
+
+### 5. Deploy
+
+The `postinstall` and `build` scripts automatically run `prisma generate` so the Prisma client is available at build time. Deploy via:
+
+```bash
+npx vercel --prod
+```
+
+Or push to your repo and Vercel will auto-deploy.
+
 ## Git Workflow
 
 1. Never commit directly to `main` — always create a feature branch
