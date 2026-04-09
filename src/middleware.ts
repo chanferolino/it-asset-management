@@ -6,9 +6,7 @@ export async function middleware(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
-    salt: request.url.startsWith("https://")
-      ? "__Secure-authjs.session-token"
-      : "authjs.session-token",
+    secureCookie: request.url.startsWith("https://"),
   });
 
   if (!token) {
