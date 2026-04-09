@@ -25,6 +25,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 
 const navItems = [
@@ -42,38 +43,52 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-3">
-        <span className="text-lg font-semibold">IT Assets</span>
+    <Sidebar className="border-r border-black/[0.06] bg-white/70 backdrop-blur-xl">
+      <SidebarHeader className="border-b border-black/[0.06] px-4 py-3">
+        <span className="text-lg font-bold tracking-tight text-[#300000]">IT Assets</span>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wide text-[#555555]">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    render={<Link href={item.href} />}
-                    isActive={
-                      item.href === "/"
-                        ? pathname === "/"
-                        : pathname.startsWith(item.href)
-                    }
-                  >
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navItems.map((item) => {
+                const isActive =
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href);
+
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      render={<Link href={item.href} />}
+                      isActive={isActive}
+                      className={cn(
+                        "rounded-xl transition-all",
+                        isActive
+                          ? "bg-red-500/[0.08] text-[#c80000] font-medium"
+                          : "text-[#888888] hover:bg-red-500/[0.04] hover:text-[#7b0000]"
+                      )}
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-black/[0.06]">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => signOut({ callbackUrl: "/login" })}>
+            <SidebarMenuButton
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="rounded-xl text-[#888888] transition-all hover:bg-red-500/[0.04] hover:text-[#7b0000]"
+            >
               <LogOut />
               <span>Sign out</span>
             </SidebarMenuButton>

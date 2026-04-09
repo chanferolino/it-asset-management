@@ -22,7 +22,21 @@
       "Bash(cp package.json pnpm-lock.yaml pnpm-workspace.yaml postcss.config.mjs next.config.ts eslint.config.mjs tsconfig.json \"c:/Users/Gaming PC/Desktop/Dev/it-asset-management/\")",
       "Bash(pnpm config:*)",
       "Read(//c/Users/Gaming PC/Downloads/**)",
-      "Bash(pnpm remove:*)"
+      "Bash(pnpm remove:*)",
+      "Bash(gh pr create --title 'feat: login page and dashboard layout with sidebar' --body ':*)",
+      "Bash(docker compose:*)",
+      "Bash(\"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose --version)",
+      "Bash(docker.exe compose:*)",
+      "Bash(\"/c/Program Files/Docker/Docker/resources/bin/docker.exe\" compose --version)",
+      "Bash(psql --version)",
+      "Bash(\"/c/Program Files/PostgreSQL/17/bin/psql.exe\" --version)",
+      "Bash(\"/c/Program Files/PostgreSQL/16/bin/psql.exe\" --version)",
+      "Bash(\"/c/Program Files/PostgreSQL/15/bin/psql.exe\" --version)",
+      "Bash(psql -U postgres -c \"CREATE DATABASE it_asset_management;\")",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"proceed\" npx prisma migrate reset --force)",
+      "Bash(pnpm db:seed)",
+      "Bash(gh run:*)",
+      "Bash(taskkill.exe //F //IM node.exe)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Gaming PC\\Desktop\\Dev\\it-asset-management\\docs",
