@@ -20,7 +20,13 @@
       "Read(//c/Users/Gaming PC/Desktop/Dev/**)",
       "Bash(cp -r src public \"c:/Users/Gaming PC/Desktop/Dev/it-asset-management/\")",
       "Bash(cp package.json pnpm-lock.yaml pnpm-workspace.yaml postcss.config.mjs next.config.ts eslint.config.mjs tsconfig.json \"c:/Users/Gaming PC/Desktop/Dev/it-asset-management/\")",
-      "Bash(pnpm config:*)"
+      "Bash(pnpm config:*)",
+      "Read(//c/Users/Gaming PC/Downloads/**)",
+      "Bash(pnpm remove:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\Gaming PC\\Desktop\\Dev\\it-asset-management\\docs",
+      "c:\\Users\\Gaming PC\\Desktop\\Dev\\it-asset-management\\src\\app\\api\\auth"
     ]
   },
   "enabledPlugins": {
