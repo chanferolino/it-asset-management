@@ -11,12 +11,14 @@ Building an internal IT asset management system for a small team (5-20 people). 
 
 ## Requirements
 
-### Core Menu (from dashboard-menu.md)
+### Core Menu (sidebar order)
 
 - R1. **Dashboard** — overview with key metrics (total devices, active users, open tickets, system health), recent alerts, and quick-action shortcuts
 - R2. **Inventory** — hardware assets (computers, servers, networking, peripherals, mobile) with lifecycle/status tracking; software assets (licenses, installations, expiration); search, filter, bulk actions
 - R3. **Assignments** — device-to-user tracking, checkout/return history, current status per user, department-level view
+- R10. **Check-in/Out** — desktop lookup by asset tag or serial number for quick device handoffs (promoted to top-level menu). No QR/camera scanning for now.
 - R4. **Users** — accounts, roles, department assignments, access permissions, onboarding/offboarding tracking
+- R11a. **Vendors** — top-level menu for vendor records: name, contact info (email, phone, website), and link to assets supplied. Vendor CRUD lives here; warranty fields per asset live in Inventory (see R11).
 - R5. **Tickets** — open tickets with status flow (New → In Progress → Resolved), assignment, priority, SLA tracking, knowledge base/FAQ
 - R6. **Reports** — asset usage, ticket resolution time, downtime logs, user activity, audit logs, export (CSV, PDF)
 - R7. **Configuration** — system settings, role/permission management, integrations, backup/restore
@@ -25,8 +27,7 @@ Building an internal IT asset management system for a small team (5-20 people). 
 ### Additional Features
 
 - R9. **Audit Log** — tracks who did what and when across the system (asset changes, assignments, logins). Nested under Reports, not a top-level sidebar item.
-- R10. **Asset Check-in/Check-out** — desktop lookup by asset tag or serial number for quick device handoffs. No QR/camera scanning for now.
-- R11. **Warranty & Vendor Tracking** — warranty expiration dates, vendor contacts, purchase dates, and costs per asset.
+- R11. **Warranty & Vendor Tracking** — warranty expiration dates, purchase dates, and costs per asset (fields on the Inventory asset detail page). Vendor management is its own top-level menu — see R11a above. Expiring-warranty alerts feed into Notifications (R8) and the Dashboard (R1).
 
 ### Auth
 
@@ -45,6 +46,8 @@ Building an internal IT asset management system for a small team (5-20 people). 
 - **Auth:** Username + password (no Google OAuth) — avoids external dependency for an internal tool
 - **Audit log placement:** Under Reports — keeps sidebar clean for a small-team tool
 - **Check-in/check-out:** Desktop lookup by asset tag/serial — phone scanning deferred
+- **Check-in/Out promoted to top-level menu:** High-frequency operational workflow deserves quick access between Assignments and Users
+- **Vendors as a top-level menu:** Vendor records are operational reference data (like Users), not admin settings — sits between Users and Tickets. Warranty fields stay co-located on the asset record in Inventory.
 
 ## Success Criteria
 
