@@ -18,6 +18,16 @@ async function main() {
   });
 
   console.log("Seeded admin user:", admin.email);
+
+  const settings = await prisma.setting.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: {
+      id: "singleton",
+    },
+  });
+
+  console.log("Seeded settings singleton:", settings.id);
 }
 
 main()
