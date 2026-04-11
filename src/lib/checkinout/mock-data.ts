@@ -1,0 +1,158 @@
+import type { Asset, CheckEvent, User } from "./types";
+
+export const MOCK_USERS: User[] = [
+  {
+    id: "u_001",
+    name: "Sara Patel",
+    email: "sara.patel@example.com",
+    department: "Engineering",
+  },
+  {
+    id: "u_002",
+    name: "Marco Reyes",
+    email: "marco.reyes@example.com",
+    department: "Design",
+  },
+  {
+    id: "u_003",
+    name: "Jordan Kim",
+    email: "jordan.kim@example.com",
+    department: "Operations",
+  },
+  {
+    id: "u_004",
+    name: "Priya Shah",
+    email: "priya.shah@example.com",
+    department: "Finance",
+  },
+  {
+    id: "u_005",
+    name: "Alex Nguyen",
+    email: "alex.nguyen@example.com",
+    department: "Support",
+  },
+];
+
+export const MOCK_ASSETS: Asset[] = [
+  {
+    id: "a_001",
+    tag: "IT-0001",
+    serial: "SN-ABCD1234",
+    name: 'MacBook Pro 14"',
+    category: "LAPTOP",
+    status: "AVAILABLE",
+  },
+  {
+    id: "a_002",
+    tag: "IT-0002",
+    serial: "SN-EFGH5678",
+    name: "Dell XPS 13",
+    category: "LAPTOP",
+    status: "ASSIGNED",
+    currentAssigneeId: "u_001",
+  },
+  {
+    id: "a_003",
+    tag: "IT-0003",
+    serial: "SN-IJKL9012",
+    name: "Lenovo ThinkPad X1",
+    category: "LAPTOP",
+    status: "ASSIGNED",
+    currentAssigneeId: "u_002",
+  },
+  {
+    id: "a_004",
+    tag: "IT-0004",
+    serial: "SN-MNOP3456",
+    name: 'LG UltraFine 27"',
+    category: "MONITOR",
+    status: "AVAILABLE",
+  },
+  {
+    id: "a_005",
+    tag: "IT-0005",
+    serial: "SN-QRST7890",
+    name: "iPhone 15 Pro",
+    category: "PHONE",
+    status: "IN_REPAIR",
+  },
+  {
+    id: "a_006",
+    tag: "IT-0006",
+    serial: "SN-UVWX1234",
+    name: "Dell OptiPlex 7090",
+    category: "DESKTOP",
+    status: "RETIRED",
+  },
+  {
+    id: "a_007",
+    tag: "IT-0007",
+    serial: "SN-YZAB5678",
+    name: "Logitech MX Master 3",
+    category: "ACCESSORY",
+    status: "AVAILABLE",
+  },
+];
+
+export const MOCK_HISTORY: CheckEvent[] = [
+  {
+    id: "e_001",
+    assetId: "a_002",
+    type: "CHECK_OUT",
+    userId: "u_001",
+    timestamp: "2026-03-28T14:05:00.000Z",
+    notes: "Onboarding — new hire in Engineering.",
+  },
+  {
+    id: "e_002",
+    assetId: "a_003",
+    type: "CHECK_OUT",
+    userId: "u_002",
+    timestamp: "2026-03-15T09:30:00.000Z",
+  },
+  {
+    id: "e_003",
+    assetId: "a_001",
+    type: "CHECK_IN",
+    userId: "u_003",
+    timestamp: "2026-04-02T16:45:00.000Z",
+    notes: "Returned after project handoff.",
+  },
+  {
+    id: "e_004",
+    assetId: "a_001",
+    type: "CHECK_OUT",
+    userId: "u_003",
+    timestamp: "2026-02-11T11:20:00.000Z",
+  },
+  {
+    id: "e_005",
+    assetId: "a_004",
+    type: "CHECK_IN",
+    userId: "u_004",
+    timestamp: "2026-04-05T10:15:00.000Z",
+  },
+  {
+    id: "e_006",
+    assetId: "a_004",
+    type: "CHECK_OUT",
+    userId: "u_004",
+    timestamp: "2026-01-22T13:00:00.000Z",
+    notes: "Loaner for remote work.",
+  },
+  {
+    id: "e_007",
+    assetId: "a_007",
+    type: "CHECK_IN",
+    userId: "u_005",
+    timestamp: "2026-04-08T17:30:00.000Z",
+  },
+  {
+    id: "e_008",
+    assetId: "a_002",
+    type: "CHECK_IN",
+    userId: "u_002",
+    timestamp: "2026-03-27T15:00:00.000Z",
+    notes: "Reassigning to another user tomorrow.",
+  },
+];
