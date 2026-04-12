@@ -17,6 +17,8 @@
 
 - Modal buttons must always be right-aligned: `flex justify-end gap-2`
 - Cancel button first, primary action button second (right-most)
+- Never use `window.confirm()` or browser-native dialogs — always use a shadcn Dialog confirmation modal with glassmorphism styling
+- Delete confirmations must show what's being deleted and warn that it's irreversible
 
 ## Forms
 

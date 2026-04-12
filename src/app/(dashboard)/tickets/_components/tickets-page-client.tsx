@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { deleteTicket } from "@/lib/actions/tickets";
 import type { Ticket, SimpleUser, TicketStatus } from "./types";
 import { STATUS_LABELS } from "./types";
@@ -33,12 +34,13 @@ export function TicketsPageClient({ tickets, users }: TicketsPageClientProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editTicket, setEditTicket] = useState<Ticket | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Ticket | null>(null);
   const [, startTransition] = useTransition();
 
-  function handleDelete(ticket: Ticket) {
-    if (!window.confirm(`Delete ticket "${ticket.title}"? This cannot be undone.`)) return;
+  async function handleConfirmDelete() {
+    if (!deleteTarget) return;
     startTransition(async () => {
-      const result = await deleteTicket(ticket.id);
+      const result = await deleteTicket(deleteTarget.id);
       if (result.success) {
         toast.success("Ticket deleted");
       } else {
@@ -116,7 +118,7 @@ export function TicketsPageClient({ tickets, users }: TicketsPageClientProps) {
         tickets={filteredTickets}
         onSelectTicket={setSelectedTicket}
         onEditTicket={setEditTicket}
-        onDeleteTicket={handleDelete}
+        onDeleteTicket={setDeleteTarget}
       />
 
       {/* Create modal */}
@@ -149,6 +151,18 @@ export function TicketsPageClient({ tickets, users }: TicketsPageClientProps) {
           users={users}
         />
       )}
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+        title="Delete ticket"
+        description={`Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

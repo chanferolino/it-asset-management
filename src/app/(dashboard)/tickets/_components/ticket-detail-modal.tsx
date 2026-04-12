@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { updateTicket, deleteTicket } from "@/lib/actions/tickets";
 import type { Ticket, SimpleUser, TicketStatus } from "./types";
 import {
@@ -46,6 +47,7 @@ export function TicketDetailModal({
   users,
 }: TicketDetailModalProps) {
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   async function handleStatusChange(status: TicketStatus) {
     const result = await updateTicket(ticket.id, { status });
@@ -57,12 +59,7 @@ export function TicketDetailModal({
     onOpenChange(false);
   }
 
-  async function handleDelete() {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this ticket? This action cannot be undone."
-    );
-    if (!confirmed) return;
-
+  async function handleConfirmDelete() {
     const result = await deleteTicket(ticket.id);
     if (!result.success) {
       toast.error(result.error);
@@ -220,7 +217,7 @@ export function TicketDetailModal({
               </Button>
               <Button
                 type="button"
-                onClick={handleDelete}
+                onClick={() => setDeleteOpen(true)}
                 className="rounded-xl border border-[#e0e0e0] bg-transparent text-red-600 transition-all hover:border-red-500 hover:bg-red-500/[0.04]"
               >
                 Delete
@@ -235,6 +232,15 @@ export function TicketDetailModal({
         onOpenChange={setEditOpen}
         ticket={ticket}
         users={users}
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Delete ticket"
+        description={`Are you sure you want to delete "${ticket.title}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDelete}
       />
     </>
   );
