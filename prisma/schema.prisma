@@ -14,16 +14,52 @@ enum Role {
   USER
 }
 
+enum TicketStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  name           String
-  hashedPassword String   @map("hashed_password")
-  role           Role     @default(USER)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String
+  hashedPassword  String   @map("hashed_password")
+  role            Role     @default(USER)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  ticketsCreated  Ticket[] @relation("TicketCreator")
+  ticketsAssigned Ticket[] @relation("TicketAssignee")
 
   @@map("users")
+}
+
+model Ticket {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  status       TicketStatus   @default(NEW)
+  priority     TicketPriority @default(MEDIUM)
+  createdById  String         @map("created_by_id")
+  assignedToId String?        @map("assigned_to_id")
+  assetId      String?        @map("asset_id")
+  resolvedAt   DateTime?      @map("resolved_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  createdBy    User           @relation("TicketCreator", fields: [createdById], references: [id])
+  assignedTo   User?          @relation("TicketAssignee", fields: [assignedToId], references: [id])
+
+  @@map("tickets")
 }
 
 model Setting {
