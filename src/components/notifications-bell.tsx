@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell } from "lucide-react";
 
 import {
@@ -10,7 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { MOCK_NOTIFICATIONS } from "@/lib/notifications/mock-data";
+import {
+  getNotifications,
+  markAllAsRead,
+} from "@/lib/actions/notifications";
 import type { Notification } from "@/lib/notifications/types";
 
 const SEVERITY_DOT_CLASS: Record<Notification["severity"], string> = {
@@ -39,13 +42,22 @@ interface NotificationsBellProps {
 }
 
 export function NotificationsBell({
-  initialNotifications = MOCK_NOTIFICATIONS,
+  initialNotifications,
 }: NotificationsBellProps) {
-  // Bell and inbox each maintain independent local copies of the same mock seed.
-  // The future backend plan introduces a shared store; this is a deliberate v0 simplification.
   const [notifications, setNotifications] = useState<Notification[]>(
-    initialNotifications
+    initialNotifications ?? []
   );
+
+  useEffect(() => {
+    // Fetch real data on mount if no initial data was provided
+    if (!initialNotifications) {
+      getNotifications().then((result) => {
+        if (result.success) {
+          setNotifications(result.notifications);
+        }
+      });
+    }
+  }, [initialNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   const badgeText = unreadCount > 9 ? "9+" : String(unreadCount);
@@ -60,8 +72,13 @@ export function NotificationsBell({
       .slice(0, 5);
   }, [notifications]);
 
-  function handleMarkAllRead() {
+  async function handleMarkAllRead() {
+    const previous = notifications;
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    const result = await markAllAsRead();
+    if (!result.success) {
+      setNotifications(previous);
+    }
   }
 
   return (

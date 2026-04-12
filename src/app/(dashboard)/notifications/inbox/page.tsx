@@ -1,7 +1,12 @@
-import { MOCK_NOTIFICATIONS } from "@/lib/notifications/mock-data";
+import { getNotifications } from "@/lib/actions/notifications";
 import { NotificationList } from "./_components/notification-list";
 
-export default function NotificationsInboxPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NotificationsInboxPage() {
+  const result = await getNotifications();
+  const notifications = result.success ? result.notifications : [];
+
   return (
     <div className="rounded-3xl border border-white/80 bg-white/70 p-6 shadow-xl shadow-black/[0.08] backdrop-blur-xl">
       <div className="mb-6 space-y-1">
@@ -12,7 +17,7 @@ export default function NotificationsInboxPage() {
           All recent alerts. Filter by category or hide read items.
         </p>
       </div>
-      <NotificationList initialNotifications={MOCK_NOTIFICATIONS} />
+      <NotificationList initialNotifications={notifications} />
     </div>
   );
 }

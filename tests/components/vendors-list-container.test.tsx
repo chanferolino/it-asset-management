@@ -1,18 +1,32 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
-import { VendorsListContainer } from "@/app/(dashboard)/vendors/_components/vendors-list-container";
-import type { Vendor } from "@/lib/vendors/types";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 
-vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+vi.mock("@/lib/actions/vendors", () => ({
+  createVendor: vi.fn().mockResolvedValue({ success: true }),
 }));
 
-const SEED: Vendor[] = [
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
+
+const toastSuccess = vi.fn();
+vi.mock("sonner", () => ({
+  toast: {
+    success: (...args: unknown[]) => toastSuccess(...args),
+    error: vi.fn(),
+  },
+}));
+
+import { VendorsListContainer } from "@/app/(dashboard)/vendors/_components/vendors-list-container";
+import type { VendorWithCount } from "@/lib/actions/vendors";
+
+const SEED: VendorWithCount[] = [
   {
     id: "v_a",
     name: "Alpha Supply",
     contactEmail: "a@alpha.example",
     createdAt: "2026-01-01T00:00:00.000Z",
+    assetCount: 3,
   },
   {
     id: "v_b",
@@ -20,6 +34,7 @@ const SEED: Vendor[] = [
     contactEmail: "b@bravo.example",
     contactPhone: "+1 555 0199",
     createdAt: "2026-01-02T00:00:00.000Z",
+    assetCount: 1,
   },
 ];
 
@@ -36,13 +51,6 @@ describe("VendorsListContainer", () => {
     expect(screen.getByTestId("vendors-empty-state")).toBeInTheDocument();
     expect(screen.getByText(/no vendors yet/i)).toBeInTheDocument();
     expect(screen.queryAllByTestId("vendor-card")).toHaveLength(0);
-  });
-
-  it("renders the UI-only notice", () => {
-    render(<VendorsListContainer initialVendors={SEED} />);
-    expect(
-      screen.getByText(/ui-only preview — changes are not saved/i),
-    ).toBeInTheDocument();
   });
 
   it("opens the form modal when Add vendor is clicked", () => {
@@ -62,7 +70,8 @@ describe("VendorsListContainer", () => {
     ).toHaveAttribute("data-create-open", "true");
   });
 
-  it("prepends a newly created vendor and updates the count", async () => {
+  it("calls createVendor and shows success toast on form submit", async () => {
+    const { createVendor } = await import("@/lib/actions/vendors");
     render(<VendorsListContainer initialVendors={SEED} />);
     fireEvent.click(screen.getByTestId("vendors-add-button"));
 
@@ -75,14 +84,9 @@ describe("VendorsListContainer", () => {
     });
     fireEvent.submit(within(modal).getByTestId("vendor-form"));
 
-    const newCard = await screen.findByText("Charlie Components");
-    expect(newCard).toBeInTheDocument();
-    const allCards = screen.getAllByTestId("vendor-card");
-    expect(allCards).toHaveLength(3);
-    // Newly added vendor appears first (prepend behavior)
-    expect(
-      within(allCards[0]).getByRole("heading"),
-    ).toHaveTextContent("Charlie Components");
-    expect(screen.getByText("3 vendors")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(createVendor).toHaveBeenCalledTimes(1);
+    });
+    expect(toastSuccess).toHaveBeenCalledWith("Vendor created");
   });
 });
