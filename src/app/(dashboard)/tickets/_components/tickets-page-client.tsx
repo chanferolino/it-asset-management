@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Search, Plus } from "lucide-react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { deleteTicket } from "@/lib/actions/tickets";
 import type { Ticket, SimpleUser, TicketStatus } from "./types";
 import { STATUS_LABELS } from "./types";
 import { TicketsTable } from "./tickets-table";
@@ -29,7 +31,21 @@ export function TicketsPageClient({ tickets, users }: TicketsPageClientProps) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<TicketStatus | "ALL">("ALL");
   const [createOpen, setCreateOpen] = useState(false);
+  const [editTicket, setEditTicket] = useState<Ticket | null>(null);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [, startTransition] = useTransition();
+
+  function handleDelete(ticket: Ticket) {
+    if (!window.confirm(`Delete ticket "${ticket.title}"? This cannot be undone.`)) return;
+    startTransition(async () => {
+      const result = await deleteTicket(ticket.id);
+      if (result.success) {
+        toast.success("Ticket deleted");
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
 
   const filteredTickets = useMemo(() => {
     const query = search.toLowerCase().trim();
@@ -99,6 +115,8 @@ export function TicketsPageClient({ tickets, users }: TicketsPageClientProps) {
       <TicketsTable
         tickets={filteredTickets}
         onSelectTicket={setSelectedTicket}
+        onEditTicket={setEditTicket}
+        onDeleteTicket={handleDelete}
       />
 
       {/* Create modal */}
@@ -107,6 +125,18 @@ export function TicketsPageClient({ tickets, users }: TicketsPageClientProps) {
         onOpenChange={setCreateOpen}
         users={users}
       />
+
+      {/* Edit modal */}
+      {editTicket && (
+        <TicketFormModal
+          open={!!editTicket}
+          onOpenChange={(open) => {
+            if (!open) setEditTicket(null);
+          }}
+          ticket={editTicket}
+          users={users}
+        />
+      )}
 
       {/* Detail modal */}
       {selectedTicket && (

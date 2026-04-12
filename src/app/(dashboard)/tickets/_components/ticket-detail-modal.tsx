@@ -210,7 +210,7 @@ export function TicketDetailModal({
             </div>
 
             {/* Edit & Delete */}
-            <div className="flex gap-2 border-t border-[#e0e0e0]/60 pt-4">
+            <div className="flex justify-end gap-2 border-t border-[#e0e0e0]/60 pt-4">
               <Button
                 type="button"
                 onClick={() => setEditOpen(true)}

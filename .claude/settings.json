@@ -39,7 +39,8 @@
       "Bash(taskkill.exe //F //IM node.exe)",
       "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"proceed\" npx prisma migrate reset --force --skip-seed)",
       "Bash(pnpm test:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(gh pr create --title 'feat: #6 tickets system — full CRUD with status flow and assignment' --body ':*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Gaming PC\\Desktop\\Dev\\it-asset-management\\docs",
