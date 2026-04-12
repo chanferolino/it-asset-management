@@ -44,7 +44,9 @@
     ]
   },
   "enabledPlugins": {
-    "compound-engineering@every-marketplace": true
+    "superpowers@claude-plugins-official": false,
+    "coding-tutor@compound-engineering-plugin": true,
+    "compound-engineering@compound-engineering-plugin": true
   },
   "extraKnownMarketplaces": {
     "every-marketplace": {
