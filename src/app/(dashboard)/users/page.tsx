@@ -1,10 +1,10 @@
-export default function UsersPage() {
-  return (
-    <div>
-      <h1 className="text-2xl font-bold tracking-tight text-[#300000]">Users</h1>
-      <p className="mt-2 text-[#888888]">
-        Manage user accounts, roles, and department assignments.
-      </p>
-    </div>
-  );
+import { getUsers, getDepartments } from "@/lib/actions/users";
+import { UsersPageClient } from "./_components/users-page-client";
+
+export default async function UsersPage() {
+  const [users, departments] = await Promise.all([
+    getUsers(),
+    getDepartments(),
+  ]);
+  return <UsersPageClient users={users} departments={departments} />;
 }
