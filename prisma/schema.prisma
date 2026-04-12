@@ -10,6 +10,7 @@ datasource db {
 
 enum Role {
   ADMIN
+  MANAGER
   USER
 }
 
@@ -23,4 +24,17 @@ model User {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model Setting {
+  id                    String   @id @default("singleton")
+  siteName              String   @default("IT Asset Management") @map("site_name")
+  supportEmail          String   @default("support@company.com") @map("support_email")
+  notificationsEnabled  Boolean  @default(true) @map("notifications_enabled")
+  smtpHost              String?  @map("smtp_host")
+  smtpFromAddress       String?  @map("smtp_from_address")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
 }
