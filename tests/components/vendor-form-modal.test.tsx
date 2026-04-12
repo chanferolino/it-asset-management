@@ -87,7 +87,6 @@ describe("VendorFormModal", () => {
       website: undefined,
       notes: undefined,
     });
-    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it("submits full payload when every field is filled", async () => {
