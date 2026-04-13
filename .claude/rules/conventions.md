@@ -7,6 +7,19 @@
 - Prisma for all database access
 - Validate inputs at API boundaries with Zod
 
+## Tables & Interactivity
+
+- Every data table row must have an Actions column with Edit and Delete icon buttons
+- Clickable text (e.g., titles that open a detail view) must look like a link — use `text-[#7b0000] hover:text-[#c80000]` (no underline, color change on hover)
+- Never make text clickable without visual affordance
+
+## Modals
+
+- Modal buttons must always be right-aligned: `flex justify-end gap-2`
+- Cancel button first, primary action button second (right-most)
+- Never use `window.confirm()` or browser-native dialogs — always use a shadcn Dialog confirmation modal with glassmorphism styling
+- Delete confirmations must show what's being deleted and warn that it's irreversible
+
 ## Forms
 
 - Use React Hook Form + Zod for all forms
