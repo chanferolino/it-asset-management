@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,8 +49,10 @@ export function TicketDetailModal({
 }: TicketDetailModalProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isStatusPending, startStatusTransition] = useTransition();
 
-  async function handleStatusChange(status: TicketStatus) {
+  function handleStatusChange(status: TicketStatus) {
+    startStatusTransition(async () => {
     const result = await updateTicket(ticket.id, { status });
     if (!result.success) {
       toast.error(result.error);
@@ -57,6 +60,7 @@ export function TicketDetailModal({
     }
     toast.success(`Ticket ${STATUS_LABELS[status].toLowerCase()}`);
     onOpenChange(false);
+    });
   }
 
   async function handleConfirmDelete() {
@@ -150,10 +154,11 @@ export function TicketDetailModal({
               {ticket.status === "NEW" && (
                 <Button
                   type="button"
+                  disabled={isStatusPending}
                   onClick={() => handleStatusChange("IN_PROGRESS")}
                   className="rounded-xl bg-[#c80000] text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000] active:scale-[0.98]"
                 >
-                  Start Progress
+                  {isStatusPending ? <><Spinner /> Updating...</> : "Start Progress"}
                 </Button>
               )}
 
@@ -161,13 +166,15 @@ export function TicketDetailModal({
                 <>
                   <Button
                     type="button"
+                    disabled={isStatusPending}
                     onClick={() => handleStatusChange("RESOLVED")}
                     className="rounded-xl bg-green-600 text-white transition-all hover:bg-green-700 active:bg-green-800 active:scale-[0.98]"
                   >
-                    Resolve
+                    {isStatusPending ? <><Spinner /> Updating...</> : "Resolve"}
                   </Button>
                   <Button
                     type="button"
+                    disabled={isStatusPending}
                     onClick={() => handleStatusChange("NEW")}
                     className="rounded-xl border border-[#e0e0e0] bg-transparent text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
                   >
@@ -180,13 +187,15 @@ export function TicketDetailModal({
                 <>
                   <Button
                     type="button"
+                    disabled={isStatusPending}
                     onClick={() => handleStatusChange("CLOSED")}
                     className="rounded-xl border border-[#e0e0e0] bg-transparent text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
                   >
-                    Close
+                    {isStatusPending ? <><Spinner /> Updating...</> : "Close"}
                   </Button>
                   <Button
                     type="button"
+                    disabled={isStatusPending}
                     onClick={() => handleStatusChange("NEW")}
                     className="rounded-xl border border-[#e0e0e0] bg-transparent text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
                   >
@@ -198,10 +207,11 @@ export function TicketDetailModal({
               {ticket.status === "CLOSED" && (
                 <Button
                   type="button"
+                  disabled={isStatusPending}
                   onClick={() => handleStatusChange("NEW")}
                   className="rounded-xl border border-[#e0e0e0] bg-transparent text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
                 >
-                  Reopen
+                  {isStatusPending ? <><Spinner /> Updating...</> : "Reopen"}
                 </Button>
               )}
             </div>

@@ -14,7 +14,7 @@ export function VendorCard({ vendor, assetCount, className }: VendorCardProps) {
       data-testid="vendor-card"
       data-vendor-id={vendor.id}
       className={cn(
-        "flex h-full flex-col gap-4 rounded-2xl border border-white/80 bg-white/70 p-5 shadow-lg shadow-black/[0.04] backdrop-blur-xl transition-all duration-200 hover:border-red-500/30",
+        "flex h-full cursor-pointer flex-col gap-4 rounded-2xl border border-white/80 bg-white/70 p-5 shadow-lg shadow-black/[0.04] backdrop-blur-xl transition-all duration-200 hover:border-red-500/30",
         className,
       )}
     >

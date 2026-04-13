@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -146,10 +147,15 @@ export function AuditLogTab({
 
       <div
         className={cn(
-          "overflow-x-auto rounded-3xl border border-white/80 bg-white/70 shadow-xl shadow-black/[0.08] backdrop-blur-xl",
+          "relative overflow-x-auto rounded-3xl border border-white/80 bg-white/70 shadow-xl shadow-black/[0.08] backdrop-blur-xl",
           isPending && "opacity-60",
         )}
       >
+        {isPending && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center">
+            <Spinner className="size-6 text-[#c80000]" />
+          </div>
+        )}
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-black/[0.06]">

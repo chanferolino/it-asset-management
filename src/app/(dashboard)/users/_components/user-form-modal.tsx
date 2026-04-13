@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/spinner";
 import { createUser, updateUser } from "@/lib/actions/users";
 import type { User } from "./types";
 
@@ -331,11 +332,13 @@ export function UserFormModal({
                 disabled={isPending}
                 className="rounded-xl bg-[#c80000] px-5 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
               >
-                {isPending
-                  ? "Saving..."
-                  : isEdit
-                    ? "Save changes"
-                    : "Create user"}
+                {isPending ? (
+                  <><Spinner /> Saving...</>
+                ) : isEdit ? (
+                  "Save changes"
+                ) : (
+                  "Create user"
+                )}
               </Button>
             </div>
           </form>

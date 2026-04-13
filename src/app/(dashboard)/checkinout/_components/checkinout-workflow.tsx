@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { toast } from "sonner";
+import { Spinner } from "@/components/spinner";
 import type { Asset, CheckEvent, User } from "@/lib/checkinout/types";
 import {
   lookupAsset,
@@ -24,6 +25,7 @@ export function CheckinoutWorkflow() {
   const [notFoundQuery, setNotFoundQuery] = useState<string | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
+  const [isLookupPending, startLookupTransition] = useTransition();
 
   useEffect(() => {
     getActiveUsers().then((result) => {
@@ -33,19 +35,21 @@ export function CheckinoutWorkflow() {
     });
   }, []);
 
-  async function handleLookup(query: string) {
-    const result = await lookupAsset(query);
-    if (result.success) {
-      setSelectedAsset(result.asset);
-      setAssignee(result.assignee);
-      setEvents(result.history);
-      setNotFoundQuery(null);
-    } else {
-      setSelectedAsset(null);
-      setAssignee(null);
-      setEvents([]);
-      setNotFoundQuery(query);
-    }
+  function handleLookup(query: string) {
+    startLookupTransition(async () => {
+      const result = await lookupAsset(query);
+      if (result.success) {
+        setSelectedAsset(result.asset);
+        setAssignee(result.assignee);
+        setEvents(result.history);
+        setNotFoundQuery(null);
+      } else {
+        setSelectedAsset(null);
+        setAssignee(null);
+        setEvents([]);
+        setNotFoundQuery(query);
+      }
+    });
   }
 
   async function handleCheckoutSubmit({ userId, notes }: CheckoutInput) {
@@ -86,7 +90,13 @@ export function CheckinoutWorkflow() {
     <div className="space-y-6" data-testid="checkinout-workflow">
       <LookupForm onLookup={handleLookup} />
 
-      {selectedAsset === null && notFoundQuery === null ? (
+      {isLookupPending && (
+        <div className="flex items-center justify-center py-8">
+          <Spinner className="size-6 text-[#c80000]" />
+        </div>
+      )}
+
+      {!isLookupPending && selectedAsset === null && notFoundQuery === null ? (
         <div
           data-testid="checkinout-empty-prompt"
           className="rounded-3xl border border-dashed border-[#e0e0e0] bg-white/40 p-10 text-center text-sm text-[#888888] backdrop-blur-xl"
@@ -95,14 +105,14 @@ export function CheckinoutWorkflow() {
         </div>
       ) : null}
 
-      {notFoundQuery !== null ? (
+      {!isLookupPending && notFoundQuery !== null ? (
         <AssetNotFound
           query={notFoundQuery}
           onClear={() => setNotFoundQuery(null)}
         />
       ) : null}
 
-      {selectedAsset !== null ? (
+      {!isLookupPending && selectedAsset !== null ? (
         <AssetCard
           asset={selectedAsset}
           assignee={assignee}

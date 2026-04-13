@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Spinner } from "@/components/spinner";
 import type { Vendor } from "@/lib/vendors/types";
 
 export const vendorFormSchema = z.object({
@@ -269,6 +270,7 @@ export function VendorFormModal({
               <Button
                 type="button"
                 data-testid="vendor-form-cancel"
+                disabled={form.formState.isSubmitting}
                 onClick={() => onOpenChange(false)}
                 className="rounded-xl border border-[#e0e0e0] bg-transparent px-4 py-2 text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
               >
@@ -277,9 +279,16 @@ export function VendorFormModal({
               <Button
                 type="submit"
                 data-testid="vendor-form-submit"
+                disabled={form.formState.isSubmitting}
                 className="rounded-xl bg-[#c80000] px-5 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
               >
-                {isEdit ? "Save changes" : "Create vendor"}
+                {form.formState.isSubmitting ? (
+                  <><Spinner /> Saving...</>
+                ) : isEdit ? (
+                  "Save changes"
+                ) : (
+                  "Create vendor"
+                )}
               </Button>
             </div>
           </form>

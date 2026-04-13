@@ -10,7 +10,8 @@
 ## Tables & Interactivity
 
 - Every data table row must have an Actions column with Edit and Delete icon buttons
-- Clickable text (e.g., titles that open a detail view) must look like a link — use `text-[#7b0000] hover:text-[#c80000]` (no underline, color change on hover)
+- Clickable text (e.g., titles that open a detail view) must look like a link — use `text-[#7b0000] hover:text-[#c80000] cursor-pointer` (no underline, color change on hover)
+- All clickable elements must have `cursor-pointer` — buttons, links, clickable table rows, icon buttons
 - Never make text clickable without visual affordance
 
 ## Modals

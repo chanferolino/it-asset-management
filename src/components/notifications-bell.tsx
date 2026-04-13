@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Bell } from "lucide-react";
+import { Spinner } from "@/components/spinner";
 
 import {
   DropdownMenu,
@@ -47,6 +48,7 @@ export function NotificationsBell({
   const [notifications, setNotifications] = useState<Notification[]>(
     initialNotifications ?? []
   );
+  const [isLoading, setIsLoading] = useState(!initialNotifications);
 
   useEffect(() => {
     // Fetch real data on mount if no initial data was provided
@@ -55,7 +57,7 @@ export function NotificationsBell({
         if (result.success) {
           setNotifications(result.notifications);
         }
-      });
+      }).finally(() => setIsLoading(false));
     }
   }, [initialNotifications]);
 
@@ -118,7 +120,11 @@ export function NotificationsBell({
         </div>
 
         <div className="max-h-80 overflow-y-auto" data-testid="bell-list">
-          {recent.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center px-4 py-8">
+              <Spinner className="size-5 text-[#888888]" />
+            </div>
+          ) : recent.length === 0 ? (
             <div
               data-testid="bell-empty-state"
               className="px-4 py-8 text-center text-sm text-[#888888]"

@@ -66,7 +66,14 @@ function serializeAsset(
 
 export async function getAssets(
   search?: string,
-): Promise<(Asset & { vendorName: string | null })[]> {
+): Promise<
+  (Asset & {
+    currentAssigneeId: string | null;
+    createdAt: string;
+    updatedAt: string;
+    vendor: { id: string; name: string } | null;
+  })[]
+> {
   const where = search
     ? {
         OR: [
@@ -79,13 +86,16 @@ export async function getAssets(
 
   const rows = await prisma.asset.findMany({
     where,
-    include: { vendor: { select: { name: true } } },
+    include: { vendor: { select: { id: true, name: true } } },
     orderBy: { createdAt: "desc" },
   });
 
   return rows.map((row) => ({
     ...serializeAsset(row),
-    vendorName: row.vendor?.name ?? null,
+    currentAssigneeId: row.currentAssigneeId,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    vendor: row.vendor ? { id: row.vendor.id, name: row.vendor.name } : null,
   }));
 }
 

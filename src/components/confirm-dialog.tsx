@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/spinner";
 import {
   Dialog,
   DialogContent,
@@ -67,7 +68,7 @@ export function ConfirmDialog({
             onClick={handleConfirm}
             className="rounded-xl bg-[#c80000] px-4 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
           >
-            {loading ? "Processing..." : confirmLabel}
+            {loading ? <><Spinner /> Processing...</> : confirmLabel}
           </Button>
         </div>
       </DialogContent>
