@@ -8,22 +8,86 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ──────────────────────────────────────────────
+
 enum Role {
   ADMIN
   MANAGER
   USER
 }
 
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  IN_REPAIR
+  RETIRED
+}
+
+enum AssetCategory {
+  LAPTOP
+  DESKTOP
+  MONITOR
+  PHONE
+  ACCESSORY
+}
+
+enum CheckEventType {
+  CHECK_OUT
+  CHECK_IN
+}
+
+// ─── Models ─────────────────────────────────────────────
+
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  name           String
-  hashedPassword String   @map("hashed_password")
-  role           Role     @default(USER)
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id              String       @id @default(cuid())
+  email           String       @unique
+  name            String
+  hashedPassword  String       @map("hashed_password")
+  role            Role         @default(USER)
+  department      String?
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  assignedAssets  Asset[]      @relation("AssetAssignee")
+  checkEvents     CheckEvent[]
 
   @@map("users")
+}
+
+model Asset {
+  id                String        @id @default(cuid())
+  tag               String        @unique
+  serial            String
+  name              String
+  category          AssetCategory
+  status            AssetStatus   @default(AVAILABLE)
+  currentAssigneeId String?       @map("current_assignee_id")
+  purchaseDate      DateTime?     @map("purchase_date")
+  purchaseCost      Int?          @map("purchase_cost")
+  warrantyExpiresAt DateTime?     @map("warranty_expires_at")
+  vendorId          String?       @map("vendor_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  currentAssignee   User?         @relation("AssetAssignee", fields: [currentAssigneeId], references: [id])
+  checkEvents       CheckEvent[]
+
+  @@map("assets")
+}
+
+model CheckEvent {
+  id        String         @id @default(cuid())
+  assetId   String         @map("asset_id")
+  type      CheckEventType
+  userId    String         @map("user_id")
+  timestamp DateTime       @default(now())
+  notes     String?
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  asset     Asset          @relation(fields: [assetId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+
+  @@map("check_events")
 }
 
 model Setting {

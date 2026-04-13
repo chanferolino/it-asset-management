@@ -1,10 +1,33 @@
-export default function AssignmentsPage() {
+import {
+  getCurrentAssignments,
+  getDepartmentAllocation,
+} from "@/lib/actions/assignments";
+import { AssignmentsPageClient } from "./_components/assignments-page-client";
+import type { Assignment } from "./_components/types";
+
+export const dynamic = "force-dynamic";
+
+export default async function AssignmentsPage() {
+  const [rawAssignments, departmentAllocations] = await Promise.all([
+    getCurrentAssignments(),
+    getDepartmentAllocation(),
+  ]);
+
+  const assignments: Assignment[] = rawAssignments.map((asset) => ({
+    id: asset.id,
+    tag: asset.tag,
+    name: asset.name,
+    category: asset.category,
+    status: asset.status,
+    currentAssignee: asset.currentAssignee!,
+    checkedOutAt:
+      asset.checkEvents[0]?.timestamp?.toISOString() ?? null,
+  }));
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold tracking-tight text-[#300000]">Assignments</h1>
-      <p className="mt-2 text-[#888888]">
-        Track device-to-user assignments and checkout history.
-      </p>
-    </div>
+    <AssignmentsPageClient
+      assignments={assignments}
+      departmentAllocations={departmentAllocations}
+    />
   );
 }

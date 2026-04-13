@@ -36,7 +36,10 @@
       "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"proceed\" npx prisma migrate reset --force)",
       "Bash(pnpm db:seed)",
       "Bash(gh run:*)",
-      "Bash(taskkill.exe //F //IM node.exe)"
+      "Bash(taskkill.exe //F //IM node.exe)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"proceed\" npx prisma migrate reset --force --skip-seed)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm build:*)"
     ],
     "additionalDirectories": [
       "c:\\Users\\Gaming PC\\Desktop\\Dev\\it-asset-management\\docs",
