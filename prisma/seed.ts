@@ -22,7 +22,7 @@ async function main() {
   });
   console.log("Seeded admin user:", admin.email);
 
-  // ── Users (from Users feature #5) ──────────────────────
+  // ── Users (from Users feature) ─────────────────────────
   const dummyUsers = [
     { email: "maria.santos@company.com", name: "Maria Santos", role: "MANAGER" as const, department: "IT", phone: "+1 555-0101" },
     { email: "john.reyes@company.com", name: "John Reyes", role: "USER" as const, department: "Engineering", phone: "+1 555-0102" },
@@ -41,11 +41,7 @@ async function main() {
     await prisma.user.upsert({
       where: { email: user.email },
       update: {},
-      create: {
-        ...userData,
-        hashedPassword: userPassword,
-        status: status ?? "ACTIVE",
-      },
+      create: { ...userData, hashedPassword: userPassword, status: status ?? "ACTIVE" },
     });
   }
   console.log(`Seeded ${dummyUsers.length} dummy users`);
@@ -109,11 +105,7 @@ async function main() {
 
   const assets: Record<string, string> = {};
   for (const a of assetSeeds) {
-    const asset = await prisma.asset.upsert({
-      where: { tag: a.tag },
-      update: {},
-      create: a,
-    });
+    const asset = await prisma.asset.upsert({ where: { tag: a.tag }, update: {}, create: a });
     assets[asset.tag] = asset.id;
   }
   console.log(`Seeded ${assetSeeds.length} assets`);
@@ -134,6 +126,25 @@ async function main() {
     await prisma.checkEvent.create({ data: e });
   }
   console.log(`Seeded ${checkEventSeeds.length} check events`);
+
+  // ── Tickets ─────────────────────────────────────────────
+  const ticketSeeds = [
+    { title: "Laptop screen flickering", description: "My laptop screen keeps flickering when plugged into the docking station.", status: "NEW" as const, priority: "HIGH" as const, createdById: users["sara.patel@example.com"] },
+    { title: "Request new keyboard", description: "Need a new mechanical keyboard. Current one has sticky keys.", status: "NEW" as const, priority: "LOW" as const, createdById: users["marco.reyes@example.com"] },
+    { title: "VPN connection drops frequently", description: "VPN disconnects every 15-20 minutes.", status: "IN_PROGRESS" as const, priority: "HIGH" as const, createdById: users["jordan.kim@example.com"], assignedToId: admin.id },
+    { title: "Install Adobe Creative Suite", description: "Need Adobe CC installed for design work.", status: "IN_PROGRESS" as const, priority: "MEDIUM" as const, createdById: users["marco.reyes@example.com"], assignedToId: admin.id },
+    { title: "Email not syncing on phone", description: "Work email stopped syncing on my iPhone.", status: "RESOLVED" as const, priority: "MEDIUM" as const, createdById: users["sara.patel@example.com"], assignedToId: admin.id, resolvedAt: new Date("2026-04-10T14:30:00Z") },
+    { title: "Printer jam on 3rd floor", description: "The HP LaserJet on the 3rd floor keeps jamming.", status: "RESOLVED" as const, priority: "LOW" as const, createdById: users["jordan.kim@example.com"], assignedToId: users["sara.patel@example.com"], resolvedAt: new Date("2026-04-09T11:00:00Z") },
+    { title: "Set up new hire workstation", description: "New engineer starting Monday. Need full workstation setup.", status: "NEW" as const, priority: "CRITICAL" as const, createdById: admin.id },
+    { title: "Replace broken monitor", description: "Monitor in conference room B has dead pixels.", status: "CLOSED" as const, priority: "MEDIUM" as const, createdById: users["marco.reyes@example.com"], assignedToId: admin.id, resolvedAt: new Date("2026-04-05T16:00:00Z") },
+    { title: "Slow network in building A", description: "Internet speed unusually slow this week.", status: "IN_PROGRESS" as const, priority: "CRITICAL" as const, createdById: admin.id, assignedToId: admin.id },
+    { title: "Update antivirus definitions", description: "Several machines showing outdated antivirus.", status: "NEW" as const, priority: "MEDIUM" as const, createdById: users["sara.patel@example.com"] },
+  ];
+
+  for (const t of ticketSeeds) {
+    await prisma.ticket.create({ data: t });
+  }
+  console.log(`Seeded ${ticketSeeds.length} tickets`);
 
   // ── Notifications ───────────────────────────────────────
   const notificationSeeds = [

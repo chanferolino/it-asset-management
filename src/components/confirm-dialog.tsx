@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,46 +10,47 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface VendorDeleteDialogProps {
+interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  vendorName: string;
-  onConfirm: () => void;
+  title: string;
+  description: string;
+  confirmLabel?: string;
+  onConfirm: () => void | Promise<void>;
 }
 
-export function VendorDeleteDialog({
+export function ConfirmDialog({
   open,
   onOpenChange,
-  vendorName,
+  title,
+  description,
+  confirmLabel = "Delete",
   onConfirm,
-}: VendorDeleteDialogProps) {
+}: ConfirmDialogProps) {
+  const [isPending, startTransition] = useTransition();
+
   function handleConfirm() {
-    onConfirm();
-    onOpenChange(false);
+    startTransition(async () => {
+      await onConfirm();
+      onOpenChange(false);
+    });
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        data-testid="vendor-delete-dialog"
-        className="max-w-md rounded-3xl border border-white/80 bg-white/80 p-6 shadow-xl shadow-black/[0.08] backdrop-blur-xl"
-      >
+      <DialogContent className="max-w-sm rounded-3xl border border-white/80 bg-white/80 p-6 shadow-xl shadow-black/[0.08] backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold tracking-tight text-[#300000]">
-            Delete vendor?
+            {title}
           </DialogTitle>
-          <DialogDescription
-            data-testid="vendor-delete-dialog-description"
-            className="text-sm text-[#888888]"
-          >
-            Delete {vendorName}? This cannot be undone.
+          <DialogDescription className="text-sm text-[#888888]">
+            {description}
           </DialogDescription>
         </DialogHeader>
-
-        <div className="mt-4 flex justify-end gap-2">
+        <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"
-            data-testid="vendor-delete-cancel"
+            disabled={isPending}
             onClick={() => onOpenChange(false)}
             className="rounded-xl border border-[#e0e0e0] bg-transparent px-4 py-2 text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
           >
@@ -56,11 +58,11 @@ export function VendorDeleteDialog({
           </Button>
           <Button
             type="button"
-            data-testid="vendor-delete-confirm"
+            disabled={isPending}
             onClick={handleConfirm}
-            className="rounded-xl bg-[#c80000] px-5 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
+            className="rounded-xl bg-[#c80000] px-4 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
           >
-            Delete
+            {isPending ? "Deleting..." : confirmLabel}
           </Button>
         </div>
       </DialogContent>
