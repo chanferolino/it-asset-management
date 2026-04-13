@@ -21,6 +21,7 @@ import {
   AUDIT_ENTITY_OPTIONS,
   AUDIT_ACTION_OPTIONS,
 } from "./types";
+import { AuditDetailModal } from "./audit-detail-modal";
 
 const PAGE_SIZE = 50;
 
@@ -36,6 +37,7 @@ export function AuditLogTab({
   const [page, setPage] = useState(0);
   const [entityFilter, setEntityFilter] = useState("All");
   const [actionFilter, setActionFilter] = useState("All");
+  const [selectedEntry, setSelectedEntry] = useState<AuditLogEntry | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -182,7 +184,8 @@ export function AuditLogTab({
             {logs.map((log) => (
               <tr
                 key={log.id}
-                className="border-b border-black/[0.04] transition-colors hover:bg-red-500/[0.02]"
+                onClick={() => setSelectedEntry(log)}
+                className="cursor-pointer border-b border-black/[0.04] transition-colors hover:bg-red-500/[0.02]"
               >
                 <td className="px-4 py-3">
                   <span
@@ -245,6 +248,14 @@ export function AuditLogTab({
           </Button>
         </div>
       </div>
+
+      <AuditDetailModal
+        open={selectedEntry !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedEntry(null);
+        }}
+        entry={selectedEntry}
+      />
     </div>
   );
 }
