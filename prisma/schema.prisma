@@ -16,6 +16,11 @@ enum Role {
   USER
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
 enum AssetStatus {
   AVAILABLE
   ASSIGNED
@@ -52,14 +57,16 @@ enum NotificationSeverity {
 // ─── Models ─────────────────────────────────────────────
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
+  id             String     @id @default(cuid())
+  email          String     @unique
   name           String
-  hashedPassword String   @map("hashed_password")
-  role           Role     @default(USER)
+  hashedPassword String     @map("hashed_password")
+  role           Role       @default(USER)
+  status         UserStatus @default(ACTIVE)
   department     String?
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  phone          String?
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
 
   checkEvents    CheckEvent[]
   notifications  Notification[]
@@ -90,7 +97,7 @@ model Asset {
   category          AssetCategory
   status            AssetStatus   @default(AVAILABLE)
   purchaseDate      DateTime?     @map("purchase_date")
-  purchaseCost      Int?          @map("purchase_cost") // cents
+  purchaseCost      Int?          @map("purchase_cost")
   warrantyExpiresAt DateTime?     @map("warranty_expires_at")
   currentAssigneeId String?       @map("current_assignee_id")
   vendorId          String?       @map("vendor_id")
