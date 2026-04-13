@@ -16,6 +16,11 @@ enum Role {
   USER
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
 enum AssetStatus {
   AVAILABLE
   ASSIGNED
@@ -34,6 +39,20 @@ enum AssetCategory {
 enum CheckEventType {
   CHECK_OUT
   CHECK_IN
+}
+
+enum TicketStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
 }
 
 enum AuditAction {
@@ -64,18 +83,23 @@ enum NotificationSeverity {
 // ─── Models ─────────────────────────────────────────────
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  name           String
-  hashedPassword String   @map("hashed_password")
-  role           Role     @default(USER)
-  department     String?
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  id              String     @id @default(cuid())
+  email           String     @unique
+  name            String
+  hashedPassword  String     @map("hashed_password")
+  role            Role       @default(USER)
+  status          UserStatus @default(ACTIVE)
+  department      String?
+  phone           String?
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
 
-  checkEvents    CheckEvent[]
-  notifications  Notification[]
-  auditLogs      AuditLog[]
+  assignedAssets  Asset[]      @relation("AssetAssignee")
+  ticketsCreated  Ticket[]     @relation("TicketCreator")
+  ticketsAssigned Ticket[]     @relation("TicketAssignee")
+  checkEvents     CheckEvent[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
 
   @@map("users")
 }
@@ -102,14 +126,15 @@ model Asset {
   name              String
   category          AssetCategory
   status            AssetStatus   @default(AVAILABLE)
-  purchaseDate      DateTime?     @map("purchase_date")
-  purchaseCost      Int?          @map("purchase_cost") // cents
-  warrantyExpiresAt DateTime?     @map("warranty_expires_at")
   currentAssigneeId String?       @map("current_assignee_id")
+  purchaseDate      DateTime?     @map("purchase_date")
+  purchaseCost      Int?          @map("purchase_cost")
+  warrantyExpiresAt DateTime?     @map("warranty_expires_at")
   vendorId          String?       @map("vendor_id")
   createdAt         DateTime      @default(now()) @map("created_at")
   updatedAt         DateTime      @updatedAt @map("updated_at")
 
+  currentAssignee   User?         @relation("AssetAssignee", fields: [currentAssigneeId], references: [id])
   vendor            Vendor?       @relation(fields: [vendorId], references: [id])
   checkEvents       CheckEvent[]
 
@@ -131,20 +156,23 @@ model CheckEvent {
   @@map("check_events")
 }
 
-model Notification {
-  id        String               @id @default(cuid())
-  title     String
-  body      String
-  category  NotificationCategory
-  severity  NotificationSeverity
-  read      Boolean              @default(false)
-  link      String?
-  userId    String?              @map("user_id")
-  createdAt DateTime             @default(now()) @map("created_at")
+model Ticket {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  status       TicketStatus   @default(NEW)
+  priority     TicketPriority @default(MEDIUM)
+  createdById  String         @map("created_by_id")
+  assignedToId String?        @map("assigned_to_id")
+  assetId      String?        @map("asset_id")
+  resolvedAt   DateTime?      @map("resolved_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
 
-  user      User?                @relation(fields: [userId], references: [id])
+  createdBy    User           @relation("TicketCreator", fields: [createdById], references: [id])
+  assignedTo   User?          @relation("TicketAssignee", fields: [assignedToId], references: [id])
 
-  @@map("notifications")
+  @@map("tickets")
 }
 
 model AuditLog {
@@ -159,6 +187,22 @@ model AuditLog {
   user       User?       @relation(fields: [userId], references: [id])
 
   @@map("audit_logs")
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  title     String
+  body      String
+  category  NotificationCategory
+  severity  NotificationSeverity
+  read      Boolean              @default(false)
+  link      String?
+  userId    String?              @map("user_id")
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  user      User?                @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
 }
 
 model Setting {
