@@ -27,6 +27,35 @@ function formatDateTime(iso: string) {
   });
 }
 
+const DETAIL_KEY_LABELS: Record<string, string> = {
+  assignedTo: "Assigned To",
+  returnedBy: "Returned By",
+  previousStatus: "Previous Status",
+  status: "Status",
+  name: "Name",
+  tag: "Asset Tag",
+  email: "Email",
+  department: "Department",
+  role: "Role",
+  title: "Title",
+  priority: "Priority",
+  description: "Description",
+  category: "Category",
+  serialNumber: "Serial Number",
+  purchaseCost: "Purchase Cost",
+  vendorId: "Vendor",
+  currentAssigneeId: "Assigned To",
+  assetId: "Asset",
+};
+
+function humanizeKey(key: string): string {
+  if (DETAIL_KEY_LABELS[key]) return DETAIL_KEY_LABELS[key];
+  return key
+    .replace(/([A-Z])/g, " $1")
+    .replace(/^./, (s) => s.toUpperCase())
+    .trim();
+}
+
 function formatDetails(details: string | null): Record<string, string> | null {
   if (!details) return null;
   try {
@@ -99,7 +128,7 @@ export function AuditDetailModal({
               <dl className="space-y-2 text-sm">
                 {Object.entries(parsed).map(([key, value]) => (
                   <div key={key} className="flex justify-between">
-                    <dt className="text-[#888888]">{key}</dt>
+                    <dt className="text-[#888888]">{humanizeKey(key)}</dt>
                     <dd className="text-[#300000]">{String(value)}</dd>
                   </div>
                 ))}
