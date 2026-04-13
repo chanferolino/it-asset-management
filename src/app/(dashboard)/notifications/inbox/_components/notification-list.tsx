@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import type { Notification } from "@/lib/notifications/types";
+import {
+  markAsRead,
+  markAllAsRead,
+} from "@/lib/actions/notifications";
 import { NotificationItem } from "./notification-item";
 import {
   NotificationFilters,
@@ -29,18 +34,34 @@ export function NotificationList({ initialNotifications }: NotificationListProps
 
   const hasUnread = notifications.some((n) => !n.read);
 
-  function handleMarkAsRead(id: string) {
+  async function handleMarkAsRead(id: string) {
+    // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
+    const result = await markAsRead(id);
+    if (!result.success) {
+      toast.error(result.error);
+      // Revert on failure
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, read: false } : n))
+      );
+    }
   }
 
   function handleDismiss(id: string) {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   }
 
-  function handleMarkAllRead() {
+  async function handleMarkAllRead() {
+    const previousNotifications = notifications;
+    // Optimistic update
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    const result = await markAllAsRead();
+    if (!result.success) {
+      toast.error(result.error);
+      setNotifications(previousNotifications);
+    }
   }
 
   return (

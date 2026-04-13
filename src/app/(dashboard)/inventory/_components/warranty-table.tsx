@@ -12,7 +12,7 @@ import { formatDate } from "@/lib/inventory/format";
 import type { Asset } from "@/lib/inventory/types";
 import type { WarrantyStatus } from "@/lib/inventory/warranty";
 import { findVendorById } from "@/lib/vendors/lookup";
-import { MOCK_VENDORS } from "@/lib/vendors/mock-data";
+import type { Vendor } from "@/lib/vendors/types";
 
 export interface WarrantyTableRow {
   asset: Asset;
@@ -21,9 +21,10 @@ export interface WarrantyTableRow {
 
 interface WarrantyTableProps {
   assets: WarrantyTableRow[];
+  vendors?: Vendor[];
 }
 
-export function WarrantyTable({ assets }: WarrantyTableProps) {
+export function WarrantyTable({ assets, vendors = [] }: WarrantyTableProps) {
   return (
     <section
       data-testid="warranty-table"
@@ -59,7 +60,7 @@ export function WarrantyTable({ assets }: WarrantyTableProps) {
           </TableHeader>
           <TableBody>
             {assets.map(({ asset, status }) => {
-              const vendor = findVendorById(MOCK_VENDORS, asset.vendorId ?? "");
+              const vendor = findVendorById(vendors, asset.vendorId ?? "");
               return (
                 <TableRow
                   key={asset.id}
