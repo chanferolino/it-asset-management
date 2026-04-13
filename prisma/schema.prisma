@@ -36,6 +36,19 @@ enum CheckEventType {
   CHECK_IN
 }
 
+enum NotificationCategory {
+  SYSTEM
+  SECURITY
+  MAINTENANCE
+  WARRANTY
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
 // ─── Models ─────────────────────────────────────────────
 
 model User {
@@ -50,8 +63,24 @@ model User {
 
   assignedAssets  Asset[]      @relation("AssetAssignee")
   checkEvents     CheckEvent[]
+  notifications   Notification[]
 
   @@map("users")
+}
+
+model Vendor {
+  id           String   @id @default(cuid())
+  name         String
+  contactEmail String   @map("contact_email")
+  contactPhone String?  @map("contact_phone")
+  website      String?
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  assets       Asset[]
+
+  @@map("vendors")
 }
 
 model Asset {
@@ -70,6 +99,7 @@ model Asset {
   updatedAt         DateTime      @updatedAt @map("updated_at")
 
   currentAssignee   User?         @relation("AssetAssignee", fields: [currentAssigneeId], references: [id])
+  vendor            Vendor?       @relation(fields: [vendorId], references: [id])
   checkEvents       CheckEvent[]
 
   @@map("assets")
@@ -88,6 +118,22 @@ model CheckEvent {
   user      User           @relation(fields: [userId], references: [id])
 
   @@map("check_events")
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  title     String
+  body      String
+  category  NotificationCategory
+  severity  NotificationSeverity
+  read      Boolean              @default(false)
+  link      String?
+  userId    String?              @map("user_id")
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  user      User?                @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
 }
 
 model Setting {

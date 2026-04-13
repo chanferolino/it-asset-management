@@ -1,5 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+
+vi.mock("@/lib/actions/notifications", () => ({
+  getNotifications: vi.fn().mockResolvedValue({ success: true, notifications: [] }),
+  markAllAsRead: vi.fn().mockResolvedValue({ success: true }),
+}));
 
 import { NotificationsBell } from "@/components/notifications-bell";
 import type { Notification } from "@/lib/notifications/types";
