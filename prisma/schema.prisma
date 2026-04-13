@@ -8,10 +8,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─── Enums ──────────────────────────────────────────────
+
 enum Role {
   ADMIN
   MANAGER
   USER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AssetStatus {
+  AVAILABLE
+  ASSIGNED
+  IN_REPAIR
+  RETIRED
+}
+
+enum AssetCategory {
+  LAPTOP
+  DESKTOP
+  MONITOR
+  PHONE
+  ACCESSORY
+}
+
+enum CheckEventType {
+  CHECK_OUT
+  CHECK_IN
 }
 
 enum TicketStatus {
@@ -28,19 +55,90 @@ enum TicketPriority {
   CRITICAL
 }
 
-model User {
-  id              String   @id @default(cuid())
-  email           String   @unique
-  name            String
-  hashedPassword  String   @map("hashed_password")
-  role            Role     @default(USER)
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+enum NotificationCategory {
+  SYSTEM
+  SECURITY
+  MAINTENANCE
+  WARRANTY
+}
 
-  ticketsCreated  Ticket[] @relation("TicketCreator")
-  ticketsAssigned Ticket[] @relation("TicketAssignee")
+enum NotificationSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+// ─── Models ─────────────────────────────────────────────
+
+model User {
+  id              String     @id @default(cuid())
+  email           String     @unique
+  name            String
+  hashedPassword  String     @map("hashed_password")
+  role            Role       @default(USER)
+  status          UserStatus @default(ACTIVE)
+  department      String?
+  phone           String?
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  ticketsCreated  Ticket[]   @relation("TicketCreator")
+  ticketsAssigned Ticket[]   @relation("TicketAssignee")
+  checkEvents     CheckEvent[]
+  notifications   Notification[]
 
   @@map("users")
+}
+
+model Vendor {
+  id           String   @id @default(cuid())
+  name         String
+  contactEmail String   @map("contact_email")
+  contactPhone String?  @map("contact_phone")
+  website      String?
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  assets       Asset[]
+
+  @@map("vendors")
+}
+
+model Asset {
+  id                String        @id @default(cuid())
+  tag               String        @unique
+  serial            String
+  name              String
+  category          AssetCategory
+  status            AssetStatus   @default(AVAILABLE)
+  purchaseDate      DateTime?     @map("purchase_date")
+  purchaseCost      Int?          @map("purchase_cost")
+  warrantyExpiresAt DateTime?     @map("warranty_expires_at")
+  currentAssigneeId String?       @map("current_assignee_id")
+  vendorId          String?       @map("vendor_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  vendor            Vendor?       @relation(fields: [vendorId], references: [id])
+  checkEvents       CheckEvent[]
+
+  @@map("assets")
+}
+
+model CheckEvent {
+  id        String         @id @default(cuid())
+  assetId   String         @map("asset_id")
+  type      CheckEventType
+  userId    String         @map("user_id")
+  timestamp DateTime       @default(now())
+  notes     String?
+  createdAt DateTime       @default(now()) @map("created_at")
+
+  asset     Asset          @relation(fields: [assetId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+
+  @@map("check_events")
 }
 
 model Ticket {
@@ -60,6 +158,22 @@ model Ticket {
   assignedTo   User?          @relation("TicketAssignee", fields: [assignedToId], references: [id])
 
   @@map("tickets")
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  title     String
+  body      String
+  category  NotificationCategory
+  severity  NotificationSeverity
+  read      Boolean              @default(false)
+  link      String?
+  userId    String?              @map("user_id")
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  user      User?                @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
 }
 
 model Setting {

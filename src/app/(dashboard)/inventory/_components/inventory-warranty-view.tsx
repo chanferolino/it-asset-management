@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MOCK_ASSETS } from "@/lib/inventory/mock-data";
 import type { Asset } from "@/lib/inventory/types";
 import { getWarrantyStatus, type WarrantyStatus } from "@/lib/inventory/warranty";
+import type { VendorWithCount } from "@/lib/actions/vendors";
 import { cn } from "@/lib/utils";
 import { WarrantyAlertBanner } from "./warranty-alert-banner";
 import { WarrantyTable, type WarrantyTableRow } from "./warranty-table";
@@ -26,12 +26,16 @@ const FILTER_OPTIONS: Array<{ value: WarrantyFilter; label: string }> = [
 ];
 
 interface InventoryWarrantyViewProps {
+  assets?: Asset[];
+  vendors?: VendorWithCount[];
   // Test-only affordance: lets tests pin warranty status to a known date.
   todayOverride?: Date;
   assetsOverride?: Asset[];
 }
 
 export function InventoryWarrantyView({
+  assets,
+  vendors,
   todayOverride,
   assetsOverride,
 }: InventoryWarrantyViewProps = {}) {
@@ -40,7 +44,7 @@ export function InventoryWarrantyView({
 
   const { rows, expiredCount, expiringCount } = useMemo(() => {
     const today = todayOverride ?? new Date();
-    const source = assetsOverride ?? MOCK_ASSETS;
+    const source = assetsOverride ?? assets ?? [];
     const withStatus: WarrantyTableRow[] = source.map((asset) => ({
       asset,
       status: getWarrantyStatus(asset.warrantyExpiresAt, today),
@@ -51,7 +55,7 @@ export function InventoryWarrantyView({
       expiringCount: withStatus.filter((r) => r.status === "EXPIRING_SOON")
         .length,
     };
-  }, [todayOverride, assetsOverride]);
+  }, [todayOverride, assetsOverride, assets]);
 
   const filteredRows =
     filter === "ALL"
@@ -96,7 +100,7 @@ export function InventoryWarrantyView({
         })}
       </div>
 
-      <WarrantyTable assets={filteredRows} />
+      <WarrantyTable assets={filteredRows} vendors={vendors} />
 
       <div className="flex justify-end">
         <Link

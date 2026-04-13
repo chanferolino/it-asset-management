@@ -1,16 +1,12 @@
 import { notFound } from "next/navigation";
-import { findAssetById } from "@/lib/inventory/lookup";
-import { MOCK_ASSETS } from "@/lib/inventory/mock-data";
+import { getAsset } from "@/lib/actions/inventory";
 import { getWarrantyStatus } from "@/lib/inventory/warranty";
-import { MOCK_VENDORS } from "@/lib/vendors/mock-data";
-import { findVendorById } from "@/lib/vendors/lookup";
+import type { Vendor } from "@/lib/vendors/types";
 import { AssetDetailHeader } from "../_components/asset-detail-header";
 import { WarrantyBlock } from "../_components/warranty-block";
 import { VendorBlock } from "../_components/vendor-block";
 
-// Mock "today" anchor so warranty states align with the mock data seeds.
-// Swap for `new Date()` once backed by real data.
-const MOCK_TODAY = new Date("2026-04-11T00:00:00.000Z");
+export const dynamic = "force-dynamic";
 
 interface AssetDetailPageProps {
   params: Promise<{ id: string }>;
@@ -20,18 +16,30 @@ export default async function AssetDetailPage({
   params,
 }: AssetDetailPageProps) {
   const { id } = await params;
-  const asset = findAssetById(MOCK_ASSETS, id);
+  const asset = await getAsset(id);
   if (!asset) {
     notFound();
   }
-  const vendor = findVendorById(MOCK_VENDORS, asset.vendorId ?? "");
-  const status = getWarrantyStatus(asset.warrantyExpiresAt, MOCK_TODAY);
+
+  const today = new Date();
+  const status = getWarrantyStatus(asset.warrantyExpiresAt, today);
+
+  const vendor: Vendor | null = asset.vendor
+    ? {
+        id: asset.vendor.id,
+        name: asset.vendor.name,
+        contactEmail: asset.vendor.contactEmail,
+        contactPhone: asset.vendor.contactPhone ?? undefined,
+        website: asset.vendor.website ?? undefined,
+        createdAt: "",
+      }
+    : null;
 
   return (
     <div className="space-y-6">
       <AssetDetailHeader asset={asset} />
       <div className="grid gap-6 lg:grid-cols-2">
-        <WarrantyBlock asset={asset} status={status} today={MOCK_TODAY} />
+        <WarrantyBlock asset={asset} status={status} today={today} />
         <VendorBlock vendor={vendor} />
       </div>
     </div>

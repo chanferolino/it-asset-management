@@ -70,7 +70,7 @@ interface VendorFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   vendor?: Vendor;
-  onSubmit: (values: VendorFormValues) => void;
+  onSubmit: (values: VendorFormValues) => void | Promise<void>;
 }
 
 const EMPTY_VALUES: VendorFormInput = {
@@ -113,7 +113,7 @@ export function VendorFormModal({
     form.reset(EMPTY_VALUES);
   }, [open, vendor, form]);
 
-  function handleSubmit(values: VendorFormInput) {
+  async function handleSubmit(values: VendorFormInput) {
     const payload: VendorFormValues = {
       name: values.name.trim(),
       contactEmail: values.contactEmail.trim(),
@@ -128,9 +128,8 @@ export function VendorFormModal({
       notes:
         values.notes && values.notes.trim() ? values.notes.trim() : undefined,
     };
-    onSubmit(payload);
+    await onSubmit(payload);
     form.reset(EMPTY_VALUES);
-    onOpenChange(false);
   }
 
   return (
@@ -145,8 +144,8 @@ export function VendorFormModal({
           </DialogTitle>
           <DialogDescription className="text-sm text-[#888888]">
             {isEdit
-              ? "Update vendor contact details. Changes are recorded locally (UI only)."
-              : "Record a new vendor. Changes are recorded locally (UI only)."}
+              ? "Update vendor contact details."
+              : "Record a new vendor."}
           </DialogDescription>
         </DialogHeader>
 
