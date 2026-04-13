@@ -264,7 +264,7 @@ export function AssetFormModal({
                       </FormControl>
                       <SelectContent>
                         {CATEGORY_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
+                          <SelectItem key={opt.value} value={opt.value} label={opt.label}>
                             {opt.label}
                           </SelectItem>
                         ))}
@@ -292,7 +292,7 @@ export function AssetFormModal({
                       </FormControl>
                       <SelectContent>
                         {STATUS_OPTIONS.map((opt) => (
-                          <SelectItem key={opt.value} value={opt.value}>
+                          <SelectItem key={opt.value} value={opt.value} label={opt.label}>
                             {opt.label}
                           </SelectItem>
                         ))}
@@ -322,7 +322,7 @@ export function AssetFormModal({
                     <SelectContent>
                       <SelectItem value="">None</SelectItem>
                       {vendors.map((v) => (
-                        <SelectItem key={v.id} value={v.id}>
+                        <SelectItem key={v.id} value={v.id} label={v.name}>
                           {v.name}
                         </SelectItem>
                       ))}

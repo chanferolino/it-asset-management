@@ -53,7 +53,7 @@ export function NotificationFilters({
           <SelectContent>
             <SelectItem value="ALL">All categories</SelectItem>
             {NOTIFICATION_CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>
+              <SelectItem key={cat} value={cat} label={NOTIFICATION_CATEGORY_LABELS[cat]}>
                 {NOTIFICATION_CATEGORY_LABELS[cat]}
               </SelectItem>
             ))}

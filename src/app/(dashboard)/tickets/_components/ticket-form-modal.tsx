@@ -210,7 +210,7 @@ export function TicketFormModal({
                       {(
                         Object.entries(PRIORITY_LABELS) as [string, string][]
                       ).map(([value, label]) => (
-                        <SelectItem key={value} value={value}>
+                        <SelectItem key={value} value={value} label={label}>
                           {label}
                         </SelectItem>
                       ))}
@@ -243,7 +243,7 @@ export function TicketFormModal({
                     <SelectContent>
                       <SelectItem value="__unassigned__">Unassigned</SelectItem>
                       {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
+                        <SelectItem key={user.id} value={user.id} label={user.name}>
                           {user.name}
                         </SelectItem>
                       ))}
