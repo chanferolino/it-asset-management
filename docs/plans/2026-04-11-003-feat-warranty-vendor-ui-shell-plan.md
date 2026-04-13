@@ -1,5 +1,5 @@
 ---
-title: "feat: Warranty & Vendor tracking — UI shell (vendors module, asset detail, warranty status)"
+Title: "feat: Warranty & Vendor tracking — UI shell (vendors module, asset detail, warranty status)"
 type: feat
 status: active
 date: 2026-04-11
