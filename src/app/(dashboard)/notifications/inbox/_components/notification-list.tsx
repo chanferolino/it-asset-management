@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import type { Notification } from "@/lib/notifications/types";
+import {
+  markAsRead,
+  markAllAsRead,
+  dismissNotification,
+} from "@/lib/actions/notifications";
 import { NotificationItem } from "./notification-item";
 import {
   NotificationFilters,
@@ -33,14 +38,17 @@ export function NotificationList({ initialNotifications }: NotificationListProps
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
+    markAsRead(id);
   }
 
   function handleDismiss(id: string) {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
+    dismissNotification(id);
   }
 
   function handleMarkAllRead() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllAsRead();
   }
 
   return (

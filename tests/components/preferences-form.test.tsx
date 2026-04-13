@@ -13,6 +13,10 @@ vi.mock("sonner", () => ({
   },
 }));
 
+vi.mock("@/lib/actions/notification-preferences", () => ({
+  saveNotificationPreferences: vi.fn().mockResolvedValue({ success: true }),
+}));
+
 import {
   PreferencesForm,
   notificationPreferencesSchema,
@@ -76,7 +80,7 @@ describe("PreferencesForm", () => {
 
     await waitFor(() => {
       expect(toastSuccessMock).toHaveBeenCalledWith(
-        "Preferences saved (UI only — backend pending)"
+        "Preferences saved"
       );
     });
 

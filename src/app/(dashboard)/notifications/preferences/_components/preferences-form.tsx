@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
+import { saveNotificationPreferences } from "@/lib/actions/notification-preferences";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -86,9 +87,14 @@ export function PreferencesForm({ defaultValues }: PreferencesFormProps) {
     defaultValues,
   });
 
-  function onSubmit(values: NotificationPreferencesInput) {
-    toast.success("Preferences saved (UI only — backend pending)");
-    form.reset(values);
+  async function onSubmit(values: NotificationPreferencesInput) {
+    const result = await saveNotificationPreferences(values);
+    if (result.success) {
+      toast.success("Preferences saved");
+      form.reset(values);
+    } else {
+      toast.error(result.error);
+    }
   }
 
   return (

@@ -23,7 +23,54 @@ model User {
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
+  notifications            Notification[]
+  notificationPreference   NotificationPreference?
+
   @@map("users")
+}
+
+enum NotificationCategory {
+  SYSTEM
+  SECURITY
+  MAINTENANCE
+  WARRANTY
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+model Notification {
+  id        String               @id @default(cuid())
+  title     String
+  body      String
+  category  NotificationCategory
+  severity  NotificationSeverity
+  read      Boolean              @default(false)
+  link      String?
+  userId    String               @map("user_id")
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id          String  @id @default(cuid())
+  userId      String  @unique @map("user_id")
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  system      Boolean @default(true)
+  security    Boolean @default(true)
+  maintenance Boolean @default(true)
+  warranty    Boolean @default(true)
+  inApp       Boolean @default(true) @map("in_app")
+  email       Boolean @default(false)
+
+  @@map("notification_preferences")
 }
 
 model Setting {

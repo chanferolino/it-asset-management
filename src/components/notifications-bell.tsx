@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { markAllAsRead } from "@/lib/actions/notifications";
 import { MOCK_NOTIFICATIONS } from "@/lib/notifications/mock-data";
 import type { Notification } from "@/lib/notifications/types";
 
@@ -62,6 +63,7 @@ export function NotificationsBell({
 
   function handleMarkAllRead() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    markAllAsRead();
   }
 
   return (
