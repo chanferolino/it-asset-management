@@ -265,7 +265,7 @@ export function VendorFormModal({
               )}
             />
 
-            <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+            <div className="flex justify-end gap-2 pt-2">
               <Button
                 type="button"
                 data-testid="vendor-form-cancel"

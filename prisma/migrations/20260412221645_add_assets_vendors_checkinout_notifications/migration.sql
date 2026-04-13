@@ -13,9 +13,6 @@ CREATE TYPE "NotificationCategory" AS ENUM ('SYSTEM', 'SECURITY', 'MAINTENANCE',
 -- CreateEnum
 CREATE TYPE "NotificationSeverity" AS ENUM ('INFO', 'WARNING', 'CRITICAL');
 
--- AlterTable
-ALTER TABLE "users" ADD COLUMN     "department" TEXT;
-
 -- CreateTable
 CREATE TABLE "vendors" (
     "id" TEXT NOT NULL,

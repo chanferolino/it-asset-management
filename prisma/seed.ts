@@ -4,9 +4,10 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  // ── Users ───────────────────────────────────────────────
   const hashedPassword = await bcrypt.hash("admin123", 12);
+  const userPassword = await bcrypt.hash("password123", 12);
 
+  // ── Users ───────────────────────────────────────────────
   const admin = await prisma.user.upsert({
     where: { email: "admin@company.com" },
     update: {},
@@ -20,7 +21,6 @@ async function main() {
   });
   console.log("Seeded admin user:", admin.email);
 
-  const userPassword = await bcrypt.hash("password123", 12);
   const userSeeds = [
     { email: "sara.patel@example.com", name: "Sara Patel", department: "Engineering" },
     { email: "marco.reyes@example.com", name: "Marco Reyes", department: "Design" },
@@ -90,14 +90,17 @@ async function main() {
 
   // ── Check Events ────────────────────────────────────────
   const checkEventSeeds = [
-    { assetId: assets["IT-0001"], type: "CHECK_OUT" as const, userId: users["sara.patel@example.com"], timestamp: new Date("2026-03-28T14:05:00.000Z"), notes: "Onboarding — new hire in Engineering." },
-    { assetId: assets["IT-0003"], type: "CHECK_OUT" as const, userId: users["marco.reyes@example.com"], timestamp: new Date("2026-03-15T09:30:00.000Z") },
-    { assetId: assets["IT-0002"], type: "CHECK_IN" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-04-02T16:45:00.000Z"), notes: "Returned after project handoff." },
-    { assetId: assets["IT-0005"], type: "CHECK_OUT" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-02-11T11:20:00.000Z") },
-    { assetId: assets["IT-0004"], type: "CHECK_IN" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-04-05T10:15:00.000Z") },
-    { assetId: assets["IT-0006"], type: "CHECK_OUT" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-01-22T13:00:00.000Z"), notes: "Loaner for remote work." },
-    { assetId: assets["IT-0008"], type: "CHECK_IN" as const, userId: users["alex.nguyen@example.com"], timestamp: new Date("2026-04-08T17:30:00.000Z") },
-    { assetId: assets["IT-0009"], type: "CHECK_OUT" as const, userId: users["alex.nguyen@example.com"], timestamp: new Date("2026-03-27T15:00:00.000Z"), notes: "Assigned for remote project." },
+    { assetId: assets["IT-0001"], type: "CHECK_OUT" as const, userId: users["sara.patel@example.com"], timestamp: new Date("2026-03-28T14:05:00Z"), notes: "Onboarding — new hire in Engineering." },
+    { assetId: assets["IT-0003"], type: "CHECK_OUT" as const, userId: users["marco.reyes@example.com"], timestamp: new Date("2026-03-15T09:30:00Z") },
+    { assetId: assets["IT-0005"], type: "CHECK_OUT" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-02-11T11:20:00Z") },
+    { assetId: assets["IT-0006"], type: "CHECK_OUT" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-01-22T13:00:00Z"), notes: "Loaner for remote work." },
+    { assetId: assets["IT-0009"], type: "CHECK_OUT" as const, userId: users["alex.nguyen@example.com"], timestamp: new Date("2026-03-27T15:00:00Z"), notes: "Assigned for remote project." },
+    { assetId: assets["IT-0010"], type: "CHECK_OUT" as const, userId: users["admin@company.com"], timestamp: new Date("2026-04-01T10:00:00Z") },
+    { assetId: assets["IT-0002"], type: "CHECK_OUT" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-02-01T09:00:00Z") },
+    { assetId: assets["IT-0002"], type: "CHECK_IN" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-04-02T16:45:00Z"), notes: "Returned after project handoff." },
+    { assetId: assets["IT-0004"], type: "CHECK_OUT" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-01-22T13:00:00Z") },
+    { assetId: assets["IT-0004"], type: "CHECK_IN" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-04-05T10:15:00Z") },
+    { assetId: assets["IT-0008"], type: "CHECK_IN" as const, userId: users["alex.nguyen@example.com"], timestamp: new Date("2026-04-08T17:30:00Z") },
   ];
 
   for (const e of checkEventSeeds) {
@@ -121,6 +124,27 @@ async function main() {
     await prisma.notification.create({ data: n });
   }
   console.log(`Seeded ${notificationSeeds.length} notifications`);
+
+  // ── Audit Logs ──────────────────────────────────────────
+  const auditSeeds = [
+    { action: "CREATE" as const, entity: "Asset", entityId: assets["IT-0001"], details: JSON.stringify({ name: 'MacBook Pro 14"', tag: "IT-0001" }), userId: admin.id, createdAt: new Date("2026-03-25T10:00:00Z") },
+    { action: "CREATE" as const, entity: "Asset", entityId: assets["IT-0003"], details: JSON.stringify({ name: "Lenovo ThinkPad X1 Carbon", tag: "IT-0003" }), userId: admin.id, createdAt: new Date("2026-03-26T09:00:00Z") },
+    { action: "CHECK_OUT" as const, entity: "Asset", entityId: assets["IT-0001"], details: JSON.stringify({ assignedTo: "Sara Patel" }), userId: admin.id, createdAt: new Date("2026-03-28T14:05:00Z") },
+    { action: "CHECK_OUT" as const, entity: "Asset", entityId: assets["IT-0003"], details: JSON.stringify({ assignedTo: "Marco Reyes" }), userId: admin.id, createdAt: new Date("2026-03-15T09:30:00Z") },
+    { action: "UPDATE" as const, entity: "Asset", entityId: assets["IT-0007"], details: JSON.stringify({ status: "RETIRED", previousStatus: "AVAILABLE" }), userId: admin.id, createdAt: new Date("2026-04-01T11:00:00Z") },
+    { action: "CHECK_IN" as const, entity: "Asset", entityId: assets["IT-0002"], details: JSON.stringify({ returnedBy: "Jordan Kim" }), userId: users["jordan.kim@example.com"], createdAt: new Date("2026-04-02T16:45:00Z") },
+    { action: "STATUS_CHANGE" as const, entity: "Asset", entityId: assets["IT-0005"], details: JSON.stringify({ status: "ASSIGNED", previousStatus: "AVAILABLE" }), userId: admin.id, createdAt: new Date("2026-02-11T11:20:00Z") },
+    { action: "CREATE" as const, entity: "Vendor", entityId: vendors["Acme Supply Co."], details: JSON.stringify({ name: "Acme Supply Co." }), userId: admin.id, createdAt: new Date("2026-03-20T08:00:00Z") },
+    { action: "CREATE" as const, entity: "Vendor", entityId: vendors["MetroTech Partners"], details: JSON.stringify({ name: "MetroTech Partners" }), userId: admin.id, createdAt: new Date("2026-03-20T08:05:00Z") },
+    { action: "LOGIN" as const, entity: "User", entityId: admin.id, details: JSON.stringify({ email: "admin@company.com" }), userId: admin.id, createdAt: new Date("2026-04-13T08:00:00Z") },
+    { action: "UPDATE" as const, entity: "User", entityId: users["sara.patel@example.com"], details: JSON.stringify({ department: "Engineering" }), userId: admin.id, createdAt: new Date("2026-03-28T13:00:00Z") },
+    { action: "DELETE" as const, entity: "Asset", entityId: "deleted-asset-old", details: JSON.stringify({ name: "Old broken laptop", tag: "IT-9999" }), userId: admin.id, createdAt: new Date("2026-03-10T15:00:00Z") },
+  ];
+
+  for (const a of auditSeeds) {
+    await prisma.auditLog.create({ data: a });
+  }
+  console.log(`Seeded ${auditSeeds.length} audit log entries`);
 
   // ── Settings ────────────────────────────────────────────
   const settings = await prisma.setting.upsert({

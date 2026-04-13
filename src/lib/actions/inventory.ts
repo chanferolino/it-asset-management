@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { requireAdmin } from "@/lib/auth-guards";
+import { createAuditEntry } from "@/lib/audit";
 import type { Asset } from "@/lib/inventory/types";
 
 const assetSchema = z.object({
@@ -142,7 +143,7 @@ export async function createAsset(input: AssetInput): Promise<MutationResult> {
 
   const data = parsed.data;
 
-  await prisma.asset.create({
+  const asset = await prisma.asset.create({
     data: {
       tag: data.tag,
       serial: data.serial,
@@ -159,6 +160,15 @@ export async function createAsset(input: AssetInput): Promise<MutationResult> {
   });
 
   revalidatePath("/inventory");
+
+  createAuditEntry({
+    action: "CREATE",
+    entity: "Asset",
+    entityId: asset.id,
+    details: { tag: data.tag, name: data.name, category: data.category },
+    userId: session.user.id,
+  });
+
   return { success: true };
 }
 
@@ -199,14 +209,31 @@ export async function updateAsset(
   });
 
   revalidatePath("/inventory");
+
+  createAuditEntry({
+    action: "UPDATE",
+    entity: "Asset",
+    entityId: id,
+    details: { tag: data.tag, name: data.name, category: data.category },
+    userId: session.user.id,
+  });
+
   return { success: true };
 }
 
 export async function deleteAsset(id: string): Promise<MutationResult> {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   await prisma.asset.delete({ where: { id } });
 
   revalidatePath("/inventory");
+
+  createAuditEntry({
+    action: "DELETE",
+    entity: "Asset",
+    entityId: id,
+    userId: session.user.id,
+  });
+
   return { success: true };
 }
