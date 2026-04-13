@@ -126,11 +126,14 @@ export function AuditLogTab({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {AUDIT_ACTION_OPTIONS.map((opt) => (
-                  <SelectItem key={opt} value={opt}>
-                    {opt === "All" ? "All" : (AUDIT_ACTION_LABELS[opt] ?? opt)}
-                  </SelectItem>
-                ))}
+                {AUDIT_ACTION_OPTIONS.map((opt) => {
+                  const displayLabel = opt === "All" ? "All" : (AUDIT_ACTION_LABELS[opt] ?? opt);
+                  return (
+                    <SelectItem key={opt} value={opt} label={displayLabel}>
+                      {displayLabel}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
