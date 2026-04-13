@@ -237,13 +237,18 @@ export function TicketFormModal({
                   >
                     <FormControl>
                       <SelectTrigger className="w-full rounded-xl border border-[#e0e0e0] bg-white/60 backdrop-blur-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/[0.08]">
-                        <SelectValue placeholder="Unassigned" />
+                        <SelectValue placeholder="Unassigned">
+                          {(value: string) => {
+                            if (!value || value === "__unassigned__") return "Unassigned";
+                            return users.find((u) => u.id === value)?.name ?? "Unassigned";
+                          }}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="__unassigned__">Unassigned</SelectItem>
                       {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id} label={user.name}>
+                        <SelectItem key={user.id} value={user.id}>
                           {user.name}
                         </SelectItem>
                       ))}

@@ -316,13 +316,18 @@ export function AssetFormModal({
                   >
                     <FormControl>
                       <SelectTrigger className={INPUT_CLASS}>
-                        <SelectValue placeholder="Select vendor" />
+                        <SelectValue placeholder="Select vendor">
+                          {(value: string) => {
+                            if (!value) return "None";
+                            return vendors.find((v) => v.id === value)?.name ?? "Select vendor";
+                          }}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="">None</SelectItem>
                       {vendors.map((v) => (
-                        <SelectItem key={v.id} value={v.id} label={v.name}>
+                        <SelectItem key={v.id} value={v.id}>
                           {v.name}
                         </SelectItem>
                       ))}
