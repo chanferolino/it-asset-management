@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/spinner";
 import {
   createTicket,
   updateTicket,
@@ -256,6 +257,7 @@ export function TicketFormModal({
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 type="button"
+                disabled={form.formState.isSubmitting}
                 onClick={() => onOpenChange(false)}
                 className="rounded-xl border border-[#e0e0e0] bg-transparent px-4 py-2 text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
               >
@@ -263,9 +265,16 @@ export function TicketFormModal({
               </Button>
               <Button
                 type="submit"
+                disabled={form.formState.isSubmitting}
                 className="rounded-xl bg-[#c80000] px-5 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
               >
-                {isEdit ? "Save changes" : "Create ticket"}
+                {form.formState.isSubmitting ? (
+                  <><Spinner /> Saving...</>
+                ) : isEdit ? (
+                  "Save changes"
+                ) : (
+                  "Create ticket"
+                )}
               </Button>
             </div>
           </form>

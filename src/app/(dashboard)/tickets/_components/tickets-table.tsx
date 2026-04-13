@@ -75,7 +75,7 @@ export function TicketsTable({ tickets, onSelectTicket, onEditTicket, onDeleteTi
                   <button
                     type="button"
                     onClick={() => onSelectTicket(ticket)}
-                    className="text-left font-medium text-[#7b0000] transition-colors hover:text-[#c80000]"
+                    className="cursor-pointer text-left font-medium text-[#7b0000] transition-colors hover:text-[#c80000]"
                   >
                     {ticket.title}
                   </button>
