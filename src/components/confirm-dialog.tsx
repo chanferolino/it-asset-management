@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,7 +17,7 @@ interface ConfirmDialogProps {
   description: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   isLoading?: boolean;
 }
 
@@ -25,18 +26,24 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Confirm",
+  confirmLabel = "Delete",
   cancelLabel = "Cancel",
   onConfirm,
-  isLoading = false,
+  isLoading: externalLoading,
 }: ConfirmDialogProps) {
+  const [isPending, startTransition] = useTransition();
+  const loading = externalLoading ?? isPending;
+
   function handleConfirm() {
-    onConfirm();
+    startTransition(async () => {
+      await onConfirm();
+      onOpenChange(false);
+    });
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-3xl border border-white/80 bg-white/80 p-6 shadow-xl shadow-black/[0.08] backdrop-blur-xl">
+      <DialogContent className="max-w-sm rounded-3xl border border-white/80 bg-white/80 p-6 shadow-xl shadow-black/[0.08] backdrop-blur-xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold tracking-tight text-[#300000]">
             {title}
@@ -45,23 +52,22 @@ export function ConfirmDialog({
             {description}
           </DialogDescription>
         </DialogHeader>
-
-        <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"
+            disabled={loading}
             onClick={() => onOpenChange(false)}
-            disabled={isLoading}
             className="rounded-xl border border-[#e0e0e0] bg-transparent px-4 py-2 text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
           >
             {cancelLabel}
           </Button>
           <Button
             type="button"
+            disabled={loading}
             onClick={handleConfirm}
-            disabled={isLoading}
-            className="rounded-xl bg-[#c80000] px-5 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
+            className="rounded-xl bg-[#c80000] px-4 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
           >
-            {confirmLabel}
+            {loading ? "Processing..." : confirmLabel}
           </Button>
         </div>
       </DialogContent>
