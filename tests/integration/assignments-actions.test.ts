@@ -14,6 +14,7 @@ const { requirePermissionMock, revalidatePathMock, prismaMock } = vi.hoisted(
         findMany: vi.fn(),
         create: vi.fn(),
       },
+      auditLog: { create: vi.fn().mockResolvedValue({}) },
       $transaction: vi.fn(),
     },
   }),

@@ -30,6 +30,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     ticket: ticketMock,
     user: userMock,
+    auditLog: { create: vi.fn().mockResolvedValue({}) },
   },
 }));
 

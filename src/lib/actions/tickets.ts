@@ -5,6 +5,7 @@ import { z } from "zod";
 import { Prisma } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/auth-guards";
+import { createAuditEntry } from "@/lib/audit";
 
 export type ActionResult =
   | { success: true }
@@ -122,7 +123,7 @@ export async function createTicket(
     };
   }
 
-  await prisma.ticket.create({
+  const ticket = await prisma.ticket.create({
     data: {
       ...parsed.data,
       createdById: session.user.id,
@@ -131,6 +132,14 @@ export async function createTicket(
 
   revalidatePath("/tickets");
 
+  createAuditEntry({
+    action: "CREATE",
+    entity: "Ticket",
+    entityId: ticket.id,
+    details: { title: parsed.data.title, priority: parsed.data.priority ?? "MEDIUM" },
+    userId: session.user.id,
+  });
+
   return { success: true };
 }
 
@@ -138,7 +147,7 @@ export async function updateTicket(
   id: string,
   input: UpdateTicketInput
 ): Promise<ActionResult> {
-  await requirePermission("ticket.update");
+  const session = await requirePermission("ticket.update");
 
   const parsed = updateTicketSchema.safeParse(input);
   if (!parsed.success) {
@@ -171,11 +180,19 @@ export async function updateTicket(
 
   revalidatePath("/tickets");
 
+  createAuditEntry({
+    action: parsed.data.status ? "STATUS_CHANGE" : "UPDATE",
+    entity: "Ticket",
+    entityId: id,
+    details: parsed.data,
+    userId: session.user.id,
+  });
+
   return { success: true };
 }
 
 export async function deleteTicket(id: string): Promise<ActionResult> {
-  await requirePermission("ticket.delete");
+  const session = await requirePermission("ticket.delete");
 
   try {
     await prisma.ticket.delete({ where: { id } });
@@ -190,6 +207,13 @@ export async function deleteTicket(id: string): Promise<ActionResult> {
   }
 
   revalidatePath("/tickets");
+
+  createAuditEntry({
+    action: "DELETE",
+    entity: "Ticket",
+    entityId: id,
+    userId: session.user.id,
+  });
 
   return { success: true };
 }

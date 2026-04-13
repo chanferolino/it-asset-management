@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/auth-guards";
+import { createAuditEntry } from "@/lib/audit";
 
 export type ActionResult = { success: true } | { success: false; error: string };
 
@@ -122,6 +123,14 @@ export async function unassignAsset(assetId: string): Promise<ActionResult> {
   }
 
   revalidatePath("/assignments");
+
+  createAuditEntry({
+    action: "UNASSIGN",
+    entity: "Asset",
+    entityId: assetId,
+    details: { unassignedBy: session.user.name },
+    userId: session.user.id,
+  });
 
   return { success: true };
 }
