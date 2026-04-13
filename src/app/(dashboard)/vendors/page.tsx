@@ -1,6 +1,11 @@
+import { getVendors } from "@/lib/actions/vendors";
 import { VendorsListContainer } from "./_components/vendors-list-container";
 
-export default function VendorsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function VendorsPage() {
+  const vendors = await getVendors();
+
   return (
     <div className="space-y-6">
       <div>
@@ -11,7 +16,7 @@ export default function VendorsPage() {
           Manage vendor records, contact info, and warranty providers.
         </p>
       </div>
-      <VendorsListContainer />
+      <VendorsListContainer initialVendors={vendors} />
     </div>
   );
 }

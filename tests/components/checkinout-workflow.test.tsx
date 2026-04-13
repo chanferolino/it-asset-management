@@ -10,11 +10,52 @@ vi.mock("sonner", () => ({
   },
 }));
 
+const mockLookupAsset = vi.fn();
+const mockCheckOutAsset = vi.fn();
+const mockCheckInAsset = vi.fn();
+const mockGetActiveUsers = vi.fn();
+
+vi.mock("@/lib/actions/checkinout", () => ({
+  lookupAsset: (...args: unknown[]) => mockLookupAsset(...args),
+  getActiveUsers: (...args: unknown[]) => mockGetActiveUsers(...args),
+  checkOutAsset: (...args: unknown[]) => mockCheckOutAsset(...args),
+  checkInAsset: (...args: unknown[]) => mockCheckInAsset(...args),
+}));
+
 import { CheckinoutWorkflow } from "@/app/(dashboard)/checkinout/_components/checkinout-workflow";
+
+const USERS = [
+  { id: "u_001", name: "Sara Patel", email: "sara@example.com", department: "Engineering" },
+  { id: "u_002", name: "Marco Reyes", email: "marco@example.com", department: "Design" },
+];
+
+const AVAILABLE_MACBOOK = {
+  id: "a_001",
+  tag: "IT-0001",
+  serial: "SN-ABCD1234",
+  name: 'MacBook Pro 14"',
+  category: "LAPTOP",
+  status: "AVAILABLE",
+};
+
+const ASSIGNED_DELL = {
+  id: "a_002",
+  tag: "IT-0002",
+  serial: "SN-EFGH5678",
+  name: "Dell XPS 13",
+  category: "LAPTOP",
+  status: "ASSIGNED",
+  currentAssigneeId: "u_001",
+};
 
 describe("CheckinoutWorkflow", () => {
   beforeEach(() => {
     toastSuccess.mockClear();
+    mockLookupAsset.mockReset();
+    mockCheckOutAsset.mockReset();
+    mockCheckInAsset.mockReset();
+    mockGetActiveUsers.mockReset();
+    mockGetActiveUsers.mockResolvedValue({ success: true, users: USERS });
   });
 
   it("renders the empty prompt on first mount", () => {
@@ -27,6 +68,46 @@ describe("CheckinoutWorkflow", () => {
   });
 
   it("walks the full lookup → check-out → check-in flow end-to-end", async () => {
+    // First lookup: AVAILABLE asset
+    mockLookupAsset.mockResolvedValueOnce({
+      success: true,
+      asset: AVAILABLE_MACBOOK,
+      assignee: null,
+      history: [],
+    });
+
+    // After checkout, refresh lookup returns ASSIGNED with history
+    const checkoutEvent = {
+      id: "e_new_1",
+      assetId: "a_001",
+      type: "CHECK_OUT",
+      userId: "u_002",
+      timestamp: new Date().toISOString(),
+    };
+    mockCheckOutAsset.mockResolvedValueOnce({ success: true });
+    mockLookupAsset.mockResolvedValueOnce({
+      success: true,
+      asset: { ...AVAILABLE_MACBOOK, status: "ASSIGNED", currentAssigneeId: "u_002" },
+      assignee: USERS[1],
+      history: [checkoutEvent],
+    });
+
+    // After checkin, refresh lookup returns AVAILABLE with history
+    const checkinEvent = {
+      id: "e_new_2",
+      assetId: "a_001",
+      type: "CHECK_IN",
+      userId: "u_002",
+      timestamp: new Date().toISOString(),
+    };
+    mockCheckInAsset.mockResolvedValueOnce({ success: true });
+    mockLookupAsset.mockResolvedValueOnce({
+      success: true,
+      asset: AVAILABLE_MACBOOK,
+      assignee: null,
+      history: [checkinEvent, checkoutEvent],
+    });
+
     render(<CheckinoutWorkflow />);
 
     // Step 1: look up an AVAILABLE asset (IT-0001 / MacBook Pro)
@@ -67,7 +148,7 @@ describe("CheckinoutWorkflow", () => {
       );
     });
     expect(toastSuccess).toHaveBeenCalledWith(
-      "Checked out — recorded locally (UI only)",
+      "Asset checked out successfully",
     );
     expect(
       screen.getByText(/Assigned to: Marco Reyes \(Design\)/),
@@ -94,7 +175,7 @@ describe("CheckinoutWorkflow", () => {
       );
     });
     expect(toastSuccess).toHaveBeenCalledWith(
-      "Checked in — recorded locally (UI only)",
+      "Asset checked in successfully",
     );
 
     // History now has the check-in at the top and check-out directly below
@@ -107,6 +188,11 @@ describe("CheckinoutWorkflow", () => {
   });
 
   it("shows the not-found panel and clears it on demand", async () => {
+    mockLookupAsset.mockResolvedValueOnce({
+      success: false,
+      error: "Asset not found",
+    });
+
     render(<CheckinoutWorkflow />);
 
     fireEvent.change(
@@ -132,6 +218,13 @@ describe("CheckinoutWorkflow", () => {
   });
 
   it("looks up an already-ASSIGNED asset and surfaces the Check in action", async () => {
+    mockLookupAsset.mockResolvedValueOnce({
+      success: true,
+      asset: ASSIGNED_DELL,
+      assignee: USERS[0], // Sara Patel
+      history: [],
+    });
+
     render(<CheckinoutWorkflow />);
 
     fireEvent.change(

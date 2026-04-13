@@ -1,6 +1,12 @@
+import { getAssets } from "@/lib/actions/inventory";
+import { getVendors } from "@/lib/actions/vendors";
 import { InventoryWarrantyView } from "./_components/inventory-warranty-view";
 
-export default function InventoryPage() {
+export const dynamic = "force-dynamic";
+
+export default async function InventoryPage() {
+  const [assets, vendors] = await Promise.all([getAssets(), getVendors()]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -11,7 +17,7 @@ export default function InventoryPage() {
           Warranty view — full inventory management coming with R2.
         </p>
       </div>
-      <InventoryWarrantyView />
+      <InventoryWarrantyView assets={assets} vendors={vendors} />
     </div>
   );
 }

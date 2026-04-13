@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Globe, Mail, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { updateVendor, deleteVendor } from "@/lib/actions/vendors";
 import type { Asset } from "@/lib/inventory/types";
 import type { Vendor } from "@/lib/vendors/types";
 import {
@@ -27,18 +28,28 @@ export function VendorDetailContainer({
   const [vendor, setVendor] = useState<Vendor>(initialVendor);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [, startTransition] = useTransition();
 
-  function handleEdit(values: VendorFormValues) {
-    setVendor((prev) => ({ ...prev, ...values }));
-    setEditOpen(false);
-    toast.success("Vendor updated — recorded locally (UI only)");
+  async function handleEdit(values: VendorFormValues) {
+    const result = await updateVendor(vendor.id, values);
+    if (result.success) {
+      setVendor((prev) => ({ ...prev, ...values }));
+      setEditOpen(false);
+      toast.success("Vendor updated");
+      startTransition(() => router.refresh());
+    } else {
+      toast.error(result.error);
+    }
   }
 
-  function handleDelete() {
-    // UI-only v0: we don't mutate MOCK_VENDORS, so the "deleted" vendor will
-    // reappear on the list page. The deletion is purely navigational here.
-    toast.success("Vendor deleted — recorded locally (UI only)");
-    router.push("/vendors");
+  async function handleDelete() {
+    const result = await deleteVendor(vendor.id);
+    if (result.success) {
+      toast.success("Vendor deleted");
+      router.push("/vendors");
+    } else {
+      toast.error(result.error);
+    }
   }
 
   return (
@@ -127,7 +138,7 @@ export function VendorDetailContainer({
           Actions
         </h2>
         <p className="mt-2 text-xs text-[#888888]">
-          Changes are recorded locally (UI only).
+          Manage this vendor record.
         </p>
         <div className="mt-4 flex flex-col gap-2">
           <Button

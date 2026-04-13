@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import type { Asset, CheckEvent } from "@/lib/checkinout/types";
+import type { Asset, CheckEvent, User } from "@/lib/checkinout/types";
 import {
-  MOCK_ASSETS,
-  MOCK_HISTORY,
-  MOCK_USERS,
-} from "@/lib/checkinout/mock-data";
-import { findAssetByTagOrSerial } from "@/lib/checkinout/lookup";
+  lookupAsset,
+  getActiveUsers,
+  checkOutAsset,
+  checkInAsset,
+} from "@/lib/actions/checkinout";
 import { LookupForm } from "./lookup-form";
 import { AssetCard } from "./asset-card";
 import { AssetNotFound } from "./asset-not-found";
@@ -16,93 +16,70 @@ import { CheckoutModal, type CheckoutInput } from "./checkout-modal";
 import { CheckinModal, type CheckinInput } from "./checkin-modal";
 import { HistoryList } from "./history-list";
 
-function generateEventId(): string {
-  if (
-    typeof globalThis.crypto !== "undefined" &&
-    typeof globalThis.crypto.randomUUID === "function"
-  ) {
-    return `evt_${globalThis.crypto.randomUUID()}`;
-  }
-  return `evt_${Math.random().toString(36).slice(2)}_${Date.now()}`;
-}
-
 export function CheckinoutWorkflow() {
-  const [assets, setAssets] = useState<Asset[]>(MOCK_ASSETS);
-  const [events, setEvents] = useState<CheckEvent[]>(MOCK_HISTORY);
-  const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null);
+  const [assignee, setAssignee] = useState<User | null>(null);
+  const [events, setEvents] = useState<CheckEvent[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [notFoundQuery, setNotFoundQuery] = useState<string | null>(null);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [checkinOpen, setCheckinOpen] = useState(false);
 
-  const selectedAsset = assets.find((a) => a.id === selectedAssetId) ?? null;
-  const assignee = selectedAsset?.currentAssigneeId
-    ? MOCK_USERS.find((u) => u.id === selectedAsset.currentAssigneeId) ?? null
-    : null;
-  const eventsForSelectedAsset = selectedAsset
-    ? events
-        .filter((e) => e.assetId === selectedAsset.id)
-        .slice()
-        .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
-    : [];
+  useEffect(() => {
+    getActiveUsers().then((result) => {
+      if (result.success) {
+        setUsers(result.users);
+      }
+    });
+  }, []);
 
-  function handleLookup(query: string) {
-    const match = findAssetByTagOrSerial(assets, query);
-    if (match) {
-      setSelectedAssetId(match.id);
+  async function handleLookup(query: string) {
+    const result = await lookupAsset(query);
+    if (result.success) {
+      setSelectedAsset(result.asset);
+      setAssignee(result.assignee);
+      setEvents(result.history);
       setNotFoundQuery(null);
     } else {
-      setSelectedAssetId(null);
+      setSelectedAsset(null);
+      setAssignee(null);
+      setEvents([]);
       setNotFoundQuery(query);
     }
   }
 
-  function handleCheckoutSubmit({ userId, notes }: CheckoutInput) {
-    if (!selectedAssetId) return;
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === selectedAssetId
-          ? { ...a, status: "ASSIGNED", currentAssigneeId: userId }
-          : a,
-      ),
-    );
-    setEvents((prev) => [
-      {
-        id: generateEventId(),
-        assetId: selectedAssetId,
-        type: "CHECK_OUT",
-        userId,
-        timestamp: new Date().toISOString(),
-        notes,
-      },
-      ...prev,
-    ]);
-    toast.success("Checked out — recorded locally (UI only)");
+  async function handleCheckoutSubmit({ userId, notes }: CheckoutInput) {
+    if (!selectedAsset) return;
+    const result = await checkOutAsset(selectedAsset.id, userId, notes);
+    if (result.success) {
+      toast.success("Asset checked out successfully");
+      // Refresh asset data
+      const refreshed = await lookupAsset(selectedAsset.tag);
+      if (refreshed.success) {
+        setSelectedAsset(refreshed.asset);
+        setAssignee(refreshed.assignee);
+        setEvents(refreshed.history);
+      }
+    } else {
+      toast.error(result.error);
+    }
   }
 
-  function handleCheckinSubmit({ notes }: CheckinInput) {
-    if (!selectedAssetId || !selectedAsset) return;
-    const returningUserId = selectedAsset.currentAssigneeId;
-    if (!returningUserId) return;
-
-    setAssets((prev) =>
-      prev.map((a) =>
-        a.id === selectedAssetId
-          ? { ...a, status: "AVAILABLE", currentAssigneeId: undefined }
-          : a,
-      ),
-    );
-    setEvents((prev) => [
-      {
-        id: generateEventId(),
-        assetId: selectedAssetId,
-        type: "CHECK_IN",
-        userId: returningUserId,
-        timestamp: new Date().toISOString(),
-        notes,
-      },
-      ...prev,
-    ]);
-    toast.success("Checked in — recorded locally (UI only)");
+  async function handleCheckinSubmit({ notes }: CheckinInput) {
+    if (!selectedAsset) return;
+    const result = await checkInAsset(selectedAsset.id, notes);
+    if (result.success) {
+      toast.success("Asset checked in successfully");
+      // Refresh asset data
+      const refreshed = await lookupAsset(selectedAsset.tag);
+      if (refreshed.success) {
+        setSelectedAsset(refreshed.asset);
+        setAssignee(refreshed.assignee);
+        setEvents(refreshed.history);
+      }
+    } else {
+      toast.error(result.error);
+    }
   }
 
   return (
@@ -138,7 +115,7 @@ export function CheckinoutWorkflow() {
         open={checkoutOpen}
         onOpenChange={setCheckoutOpen}
         asset={selectedAsset}
-        users={MOCK_USERS}
+        users={users}
         onSubmit={handleCheckoutSubmit}
       />
 
@@ -151,8 +128,8 @@ export function CheckinoutWorkflow() {
       />
 
       <HistoryList
-        events={eventsForSelectedAsset}
-        users={MOCK_USERS}
+        events={events}
+        users={users}
         hasSelectedAsset={selectedAsset !== null}
       />
     </div>

@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+
+vi.mock("@/lib/actions/vendors", () => ({
+  updateVendor: vi.fn().mockResolvedValue({ success: true }),
+  deleteVendor: vi.fn().mockResolvedValue({ success: true }),
+}));
+
 import { VendorDetailContainer } from "@/app/(dashboard)/vendors/_components/vendor-detail-container";
 import type { Asset } from "@/lib/inventory/types";
 import type { Vendor } from "@/lib/vendors/types";
@@ -13,8 +19,9 @@ vi.mock("sonner", () => ({
 }));
 
 const routerPush = vi.fn();
+const routerRefresh = vi.fn();
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: routerPush }),
+  useRouter: () => ({ push: routerPush, refresh: routerRefresh }),
 }));
 
 const VENDOR: Vendor = {
@@ -59,6 +66,7 @@ function renderContainer(
 ) {
   toastSuccess.mockClear();
   routerPush.mockClear();
+  routerRefresh.mockClear();
   return render(
     <VendorDetailContainer
       initialVendor={VENDOR}
@@ -127,9 +135,7 @@ describe("VendorDetailContainer", () => {
     fireEvent.submit(within(modal).getByTestId("vendor-form"));
 
     await waitFor(() => {
-      expect(toastSuccess).toHaveBeenCalledWith(
-        "Vendor updated — recorded locally (UI only)",
-      );
+      expect(toastSuccess).toHaveBeenCalledWith("Vendor updated");
     });
     // The updated name now appears in the edit button context via the
     // delete dialog description (re-opening it will reflect new name).
@@ -147,14 +153,14 @@ describe("VendorDetailContainer", () => {
     ).toHaveTextContent(/acme supply co\./i);
   });
 
-  it("fires toast and navigates to /vendors when delete is confirmed", () => {
+  it("fires toast and navigates to /vendors when delete is confirmed", async () => {
     renderContainer();
     fireEvent.click(screen.getByTestId("vendor-detail-delete-button"));
     fireEvent.click(screen.getByTestId("vendor-delete-confirm"));
 
-    expect(toastSuccess).toHaveBeenCalledWith(
-      "Vendor deleted — recorded locally (UI only)",
-    );
+    await waitFor(() => {
+      expect(toastSuccess).toHaveBeenCalledWith("Vendor deleted");
+    });
     expect(routerPush).toHaveBeenCalledWith("/vendors");
   });
 });
