@@ -1,10 +1,57 @@
-export default function DashboardPage() {
+import {
+  getDashboardStats,
+  getRecentActivity,
+  getAssetsByStatus,
+  getAssetsByCategory,
+} from "@/lib/actions/dashboard";
+import { DashboardPageClient } from "./_components/dashboard-page-client";
+import type {
+  DashboardStats,
+  RecentActivity,
+  StatusCount,
+  CategoryCount,
+} from "./_components/types";
+
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const [statsResult, activityResult, statusResult, categoryResult] =
+    await Promise.all([
+      getDashboardStats(),
+      getRecentActivity(),
+      getAssetsByStatus(),
+      getAssetsByCategory(),
+    ]);
+
+  const stats: DashboardStats = statsResult.success
+    ? statsResult.data
+    : {
+        totalAssets: 0,
+        assignedAssets: 0,
+        availableAssets: 0,
+        totalUsers: 0,
+        totalVendors: 0,
+        unreadNotifications: 0,
+      };
+
+  const recentActivity: RecentActivity[] = activityResult.success
+    ? (activityResult.data as RecentActivity[])
+    : [];
+
+  const assetsByStatus: StatusCount[] = statusResult.success
+    ? statusResult.data
+    : [];
+
+  const assetsByCategory: CategoryCount[] = categoryResult.success
+    ? categoryResult.data
+    : [];
+
   return (
-    <div>
-      <h1 className="text-2xl font-bold tracking-tight text-[#300000]">Dashboard</h1>
-      <p className="mt-2 text-[#888888]">
-        Overview of IT operations and key metrics.
-      </p>
-    </div>
+    <DashboardPageClient
+      stats={stats}
+      recentActivity={recentActivity}
+      assetsByStatus={assetsByStatus}
+      assetsByCategory={assetsByCategory}
+    />
   );
 }
