@@ -1,16 +1,27 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { authMock, redirectMock } = vi.hoisted(() => ({
+const { authMock, signOutMock, redirectMock, prismaUserFindUniqueMock } = vi.hoisted(() => ({
   authMock: vi.fn(),
+  signOutMock: vi.fn(),
   redirectMock: vi.fn((url: string) => {
     const error = new Error(`NEXT_REDIRECT:${url}`);
     (error as Error & { digest: string }).digest = `NEXT_REDIRECT;${url}`;
     throw error;
   }),
+  prismaUserFindUniqueMock: vi.fn(),
 }));
 
 vi.mock("@/lib/auth", () => ({
   auth: authMock,
+  signOut: signOutMock,
+}));
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    user: {
+      findUnique: prismaUserFindUniqueMock,
+    },
+  },
 }));
 
 vi.mock("next/navigation", () => ({
@@ -22,7 +33,11 @@ import { requireAdmin, requirePermission } from "@/lib/auth-guards";
 describe("auth guards", () => {
   beforeEach(() => {
     authMock.mockReset();
+    signOutMock.mockReset();
     redirectMock.mockClear();
+    prismaUserFindUniqueMock.mockReset();
+    // By default, user exists in DB
+    prismaUserFindUniqueMock.mockResolvedValue({ id: "exists" });
   });
 
   describe("requireAdmin", () => {
@@ -60,6 +75,17 @@ describe("auth guards", () => {
 
       await expect(requireAdmin()).rejects.toThrow(/NEXT_REDIRECT:\//);
       expect(redirectMock).toHaveBeenCalledWith("/");
+    });
+
+    it("signs out and redirects to /login when user no longer exists in DB", async () => {
+      authMock.mockResolvedValue({
+        user: { id: "gone", email: "g@x.com", name: "G", role: "ADMIN" },
+      });
+      prismaUserFindUniqueMock.mockResolvedValue(null);
+
+      await expect(requireAdmin()).rejects.toThrow(/NEXT_REDIRECT:\/login/);
+      expect(signOutMock).toHaveBeenCalledWith({ redirect: false });
+      expect(redirectMock).toHaveBeenCalledWith("/login");
     });
   });
 

@@ -7,7 +7,7 @@ async function main() {
   const hashedPassword = await bcrypt.hash("admin123", 12);
   const userPassword = await bcrypt.hash("password123", 12);
 
-  // ── Admin ───────────────────────────────────────────────
+  // ── Users ───────────────────────────────────────────────
   const admin = await prisma.user.upsert({
     where: { email: "admin@company.com" },
     update: {},
@@ -17,36 +17,10 @@ async function main() {
       hashedPassword,
       role: "ADMIN",
       department: "IT",
-      phone: "+1 555-0100",
     },
   });
   console.log("Seeded admin user:", admin.email);
 
-  // ── Users (from Users feature) ─────────────────────────
-  const dummyUsers = [
-    { email: "maria.santos@company.com", name: "Maria Santos", role: "MANAGER" as const, department: "IT", phone: "+1 555-0101" },
-    { email: "john.reyes@company.com", name: "John Reyes", role: "USER" as const, department: "Engineering", phone: "+1 555-0102" },
-    { email: "anna.cruz@company.com", name: "Anna Cruz", role: "USER" as const, department: "HR", phone: "+1 555-0103" },
-    { email: "carlos.garcia@company.com", name: "Carlos Garcia", role: "USER" as const, department: "Engineering", phone: "+1 555-0104" },
-    { email: "lisa.martinez@company.com", name: "Lisa Martinez", role: "MANAGER" as const, department: "Finance", phone: "+1 555-0105" },
-    { email: "mark.delacruz@company.com", name: "Mark Dela Cruz", role: "USER" as const, department: "Marketing", phone: "+1 555-0106" },
-    { email: "sarah.kim@company.com", name: "Sarah Kim", role: "USER" as const, department: "Engineering", phone: "+1 555-0107" },
-    { email: "david.tan@company.com", name: "David Tan", role: "USER" as const, department: "IT", phone: "+1 555-0108" },
-    { email: "jennifer.lee@company.com", name: "Jennifer Lee", role: "USER" as const, department: "HR", phone: null },
-    { email: "robert.chen@company.com", name: "Robert Chen", role: "USER" as const, department: "Finance", phone: "+1 555-0110", status: "INACTIVE" as const },
-  ];
-
-  for (const user of dummyUsers) {
-    const { status, ...userData } = user;
-    await prisma.user.upsert({
-      where: { email: user.email },
-      update: {},
-      create: { ...userData, hashedPassword: userPassword, status: status ?? "ACTIVE" },
-    });
-  }
-  console.log(`Seeded ${dummyUsers.length} dummy users`);
-
-  // ── Users for asset assignments ─────────────────────────
   const userSeeds = [
     { email: "sara.patel@example.com", name: "Sara Patel", department: "Engineering" },
     { email: "marco.reyes@example.com", name: "Marco Reyes", department: "Design" },
@@ -64,7 +38,7 @@ async function main() {
     });
     users[user.email] = user.id;
   }
-  console.log(`Seeded ${userSeeds.length} asset users`);
+  console.log(`Seeded ${userSeeds.length} users`);
 
   // ── Vendors ─────────────────────────────────────────────
   const vendorSeeds = [
@@ -105,7 +79,11 @@ async function main() {
 
   const assets: Record<string, string> = {};
   for (const a of assetSeeds) {
-    const asset = await prisma.asset.upsert({ where: { tag: a.tag }, update: {}, create: a });
+    const asset = await prisma.asset.upsert({
+      where: { tag: a.tag },
+      update: {},
+      create: a,
+    });
     assets[asset.tag] = asset.id;
   }
   console.log(`Seeded ${assetSeeds.length} assets`);
@@ -114,37 +92,21 @@ async function main() {
   const checkEventSeeds = [
     { assetId: assets["IT-0001"], type: "CHECK_OUT" as const, userId: users["sara.patel@example.com"], timestamp: new Date("2026-03-28T14:05:00Z"), notes: "Onboarding — new hire in Engineering." },
     { assetId: assets["IT-0003"], type: "CHECK_OUT" as const, userId: users["marco.reyes@example.com"], timestamp: new Date("2026-03-15T09:30:00Z") },
-    { assetId: assets["IT-0002"], type: "CHECK_IN" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-04-02T16:45:00Z"), notes: "Returned after project handoff." },
     { assetId: assets["IT-0005"], type: "CHECK_OUT" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-02-11T11:20:00Z") },
-    { assetId: assets["IT-0004"], type: "CHECK_IN" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-04-05T10:15:00Z") },
     { assetId: assets["IT-0006"], type: "CHECK_OUT" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-01-22T13:00:00Z"), notes: "Loaner for remote work." },
-    { assetId: assets["IT-0008"], type: "CHECK_IN" as const, userId: users["alex.nguyen@example.com"], timestamp: new Date("2026-04-08T17:30:00Z") },
     { assetId: assets["IT-0009"], type: "CHECK_OUT" as const, userId: users["alex.nguyen@example.com"], timestamp: new Date("2026-03-27T15:00:00Z"), notes: "Assigned for remote project." },
+    { assetId: assets["IT-0010"], type: "CHECK_OUT" as const, userId: users["admin@company.com"], timestamp: new Date("2026-04-01T10:00:00Z") },
+    { assetId: assets["IT-0002"], type: "CHECK_OUT" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-02-01T09:00:00Z") },
+    { assetId: assets["IT-0002"], type: "CHECK_IN" as const, userId: users["jordan.kim@example.com"], timestamp: new Date("2026-04-02T16:45:00Z"), notes: "Returned after project handoff." },
+    { assetId: assets["IT-0004"], type: "CHECK_OUT" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-01-22T13:00:00Z") },
+    { assetId: assets["IT-0004"], type: "CHECK_IN" as const, userId: users["priya.shah@example.com"], timestamp: new Date("2026-04-05T10:15:00Z") },
+    { assetId: assets["IT-0008"], type: "CHECK_IN" as const, userId: users["alex.nguyen@example.com"], timestamp: new Date("2026-04-08T17:30:00Z") },
   ];
 
   for (const e of checkEventSeeds) {
     await prisma.checkEvent.create({ data: e });
   }
   console.log(`Seeded ${checkEventSeeds.length} check events`);
-
-  // ── Tickets ─────────────────────────────────────────────
-  const ticketSeeds = [
-    { title: "Laptop screen flickering", description: "My laptop screen keeps flickering when plugged into the docking station.", status: "NEW" as const, priority: "HIGH" as const, createdById: users["sara.patel@example.com"] },
-    { title: "Request new keyboard", description: "Need a new mechanical keyboard. Current one has sticky keys.", status: "NEW" as const, priority: "LOW" as const, createdById: users["marco.reyes@example.com"] },
-    { title: "VPN connection drops frequently", description: "VPN disconnects every 15-20 minutes.", status: "IN_PROGRESS" as const, priority: "HIGH" as const, createdById: users["jordan.kim@example.com"], assignedToId: admin.id },
-    { title: "Install Adobe Creative Suite", description: "Need Adobe CC installed for design work.", status: "IN_PROGRESS" as const, priority: "MEDIUM" as const, createdById: users["marco.reyes@example.com"], assignedToId: admin.id },
-    { title: "Email not syncing on phone", description: "Work email stopped syncing on my iPhone.", status: "RESOLVED" as const, priority: "MEDIUM" as const, createdById: users["sara.patel@example.com"], assignedToId: admin.id, resolvedAt: new Date("2026-04-10T14:30:00Z") },
-    { title: "Printer jam on 3rd floor", description: "The HP LaserJet on the 3rd floor keeps jamming.", status: "RESOLVED" as const, priority: "LOW" as const, createdById: users["jordan.kim@example.com"], assignedToId: users["sara.patel@example.com"], resolvedAt: new Date("2026-04-09T11:00:00Z") },
-    { title: "Set up new hire workstation", description: "New engineer starting Monday. Need full workstation setup.", status: "NEW" as const, priority: "CRITICAL" as const, createdById: admin.id },
-    { title: "Replace broken monitor", description: "Monitor in conference room B has dead pixels.", status: "CLOSED" as const, priority: "MEDIUM" as const, createdById: users["marco.reyes@example.com"], assignedToId: admin.id, resolvedAt: new Date("2026-04-05T16:00:00Z") },
-    { title: "Slow network in building A", description: "Internet speed unusually slow this week.", status: "IN_PROGRESS" as const, priority: "CRITICAL" as const, createdById: admin.id, assignedToId: admin.id },
-    { title: "Update antivirus definitions", description: "Several machines showing outdated antivirus.", status: "NEW" as const, priority: "MEDIUM" as const, createdById: users["sara.patel@example.com"] },
-  ];
-
-  for (const t of ticketSeeds) {
-    await prisma.ticket.create({ data: t });
-  }
-  console.log(`Seeded ${ticketSeeds.length} tickets`);
 
   // ── Notifications ───────────────────────────────────────
   const notificationSeeds = [
