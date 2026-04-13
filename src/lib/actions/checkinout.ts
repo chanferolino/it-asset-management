@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/auth-guards";
+import { createAuditEntry } from "@/lib/audit";
 import type { Asset, CheckEvent, User } from "@/lib/checkinout/types";
 
 // ─── Schemas ────────────────────────────────────────────
@@ -174,7 +175,7 @@ export async function checkOutAsset(
   userId: string,
   notes?: string
 ): Promise<MutationResult> {
-  await requirePermission("asset.update");
+  const session = await requirePermission("asset.update");
 
   const parsed = checkOutSchema.safeParse({ assetId, userId, notes });
   if (!parsed.success) {
@@ -218,6 +219,14 @@ export async function checkOutAsset(
 
   revalidatePath("/checkinout");
 
+  createAuditEntry({
+    action: "CHECK_OUT",
+    entity: "Asset",
+    entityId: aId,
+    details: { assignedTo: uId, notes: n },
+    userId: session.user.id,
+  });
+
   return { success: true };
 }
 
@@ -225,7 +234,7 @@ export async function checkInAsset(
   assetId: string,
   notes?: string
 ): Promise<MutationResult> {
-  await requirePermission("asset.update");
+  const session = await requirePermission("asset.update");
 
   const parsed = checkInSchema.safeParse({ assetId, notes });
   if (!parsed.success) {
@@ -264,6 +273,14 @@ export async function checkInAsset(
   ]);
 
   revalidatePath("/checkinout");
+
+  createAuditEntry({
+    action: "CHECK_IN",
+    entity: "Asset",
+    entityId: aId,
+    details: { returnedBy: returningUserId, notes: n },
+    userId: session.user.id,
+  });
 
   return { success: true };
 }

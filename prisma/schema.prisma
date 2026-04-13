@@ -36,6 +36,18 @@ enum CheckEventType {
   CHECK_IN
 }
 
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  ASSIGN
+  UNASSIGN
+  CHECK_IN
+  CHECK_OUT
+  LOGIN
+  STATUS_CHANGE
+}
+
 enum NotificationCategory {
   SYSTEM
   SECURITY
@@ -63,6 +75,7 @@ model User {
 
   checkEvents    CheckEvent[]
   notifications  Notification[]
+  auditLogs      AuditLog[]
 
   @@map("users")
 }
@@ -132,6 +145,20 @@ model Notification {
   user      User?                @relation(fields: [userId], references: [id])
 
   @@map("notifications")
+}
+
+model AuditLog {
+  id         String      @id @default(cuid())
+  action     AuditAction
+  entity     String
+  entityId   String      @map("entity_id")
+  details    String?
+  userId     String?     @map("user_id")
+  createdAt  DateTime    @default(now()) @map("created_at")
+
+  user       User?       @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
 }
 
 model Setting {
