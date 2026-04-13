@@ -16,7 +16,9 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   confirmLabel?: string;
+  cancelLabel?: string;
   onConfirm: () => void | Promise<void>;
+  isLoading?: boolean;
 }
 
 export function ConfirmDialog({
@@ -25,9 +27,12 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel = "Delete",
+  cancelLabel = "Cancel",
   onConfirm,
+  isLoading: externalLoading,
 }: ConfirmDialogProps) {
   const [isPending, startTransition] = useTransition();
+  const loading = externalLoading ?? isPending;
 
   function handleConfirm() {
     startTransition(async () => {
@@ -50,19 +55,19 @@ export function ConfirmDialog({
         <div className="flex justify-end gap-2 pt-2">
           <Button
             type="button"
-            disabled={isPending}
+            disabled={loading}
             onClick={() => onOpenChange(false)}
             className="rounded-xl border border-[#e0e0e0] bg-transparent px-4 py-2 text-[#7b0000] transition-all hover:border-[#c80000] hover:bg-red-500/[0.04]"
           >
-            Cancel
+            {cancelLabel}
           </Button>
           <Button
             type="button"
-            disabled={isPending}
+            disabled={loading}
             onClick={handleConfirm}
             className="rounded-xl bg-[#c80000] px-4 py-2 text-white transition-all hover:bg-[#b10000] active:bg-[#7b0000]"
           >
-            {isPending ? "Deleting..." : confirmLabel}
+            {loading ? "Processing..." : confirmLabel}
           </Button>
         </div>
       </DialogContent>
