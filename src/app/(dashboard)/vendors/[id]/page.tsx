@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MOCK_ASSETS } from "@/lib/inventory/mock-data";
-import { MOCK_VENDORS } from "@/lib/vendors/mock-data";
-import { findVendorById } from "@/lib/vendors/lookup";
+import { getVendor } from "@/lib/actions/vendors";
 import { VendorDetailContainer } from "../_components/vendor-detail-container";
+
+export const dynamic = "force-dynamic";
 
 interface VendorDetailPageProps {
   params: Promise<{ id: string }>;
@@ -13,11 +13,10 @@ export default async function VendorDetailPage({
   params,
 }: VendorDetailPageProps) {
   const { id } = await params;
-  const vendor = findVendorById(MOCK_VENDORS, id);
-  if (!vendor) {
+  const result = await getVendor(id);
+  if (!result) {
     notFound();
   }
-  const assetsForVendor = MOCK_ASSETS.filter((a) => a.vendorId === vendor.id);
 
   return (
     <div className="space-y-6">
@@ -29,15 +28,15 @@ export default async function VendorDetailPage({
           ← Back to vendors
         </Link>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-[#300000]">
-          {vendor.name}
+          {result.vendor.name}
         </h1>
         <p className="mt-2 text-sm text-[#888888]">
           Vendor details and assets supplied.
         </p>
       </div>
       <VendorDetailContainer
-        initialVendor={vendor}
-        initialAssets={assetsForVendor}
+        initialVendor={result.vendor}
+        initialAssets={result.assets}
       />
     </div>
   );
