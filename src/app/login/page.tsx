@@ -16,7 +16,7 @@ export default async function LoginPage() {
   });
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <Card className="w-full max-w-sm rounded-3xl border border-white/80 bg-white/70 shadow-xl shadow-black/[0.08] backdrop-blur-xl">
         <CardHeader className="text-center">
           {setting.logoDataUrl ? (
