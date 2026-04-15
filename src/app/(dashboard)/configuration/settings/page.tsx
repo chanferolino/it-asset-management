@@ -25,6 +25,7 @@ export default async function SettingsPage() {
           notificationsEnabled: setting.notificationsEnabled,
           smtpHost: setting.smtpHost ?? "",
           smtpFromAddress: setting.smtpFromAddress ?? "",
+          logoDataUrl: setting.logoDataUrl ?? "",
         }}
       />
     </div>

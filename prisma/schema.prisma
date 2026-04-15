@@ -99,9 +99,27 @@ model User {
   ticketsAssigned Ticket[]     @relation("TicketAssignee")
   checkEvents     CheckEvent[]
   notifications   Notification[]
+  notificationPreference NotificationPreference?
   auditLogs       AuditLog[]
 
   @@map("users")
+}
+
+model NotificationPreference {
+  id          String   @id @default(cuid())
+  userId      String   @unique @map("user_id")
+  system      Boolean  @default(true)
+  security    Boolean  @default(true)
+  maintenance Boolean  @default(true)
+  warranty    Boolean  @default(true)
+  inApp       Boolean  @default(true) @map("in_app")
+  email       Boolean  @default(false)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
 }
 
 model Vendor {
@@ -212,6 +230,7 @@ model Setting {
   notificationsEnabled  Boolean  @default(true) @map("notifications_enabled")
   smtpHost              String?  @map("smtp_host")
   smtpFromAddress       String?  @map("smtp_from_address")
+  logoDataUrl           String?  @map("logo_data_url")
   createdAt             DateTime @default(now()) @map("created_at")
   updatedAt             DateTime @updatedAt @map("updated_at")
 

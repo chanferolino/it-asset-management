@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { cn } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,10 +15,25 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "IT Asset Management",
-  description: "Internal system for tracking and managing IT assets",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  try {
+    const setting = await prisma.setting.findUnique({
+      where: { id: "singleton" },
+    });
+    return {
+      title: setting?.siteName ?? "IT Asset Management",
+      description: "Internal system for tracking and managing IT assets",
+      icons: setting?.logoDataUrl
+        ? { icon: setting.logoDataUrl }
+        : undefined,
+    };
+  } catch {
+    return {
+      title: "IT Asset Management",
+      description: "Internal system for tracking and managing IT assets",
+    };
+  }
+}
 
 export default function RootLayout({
   children,

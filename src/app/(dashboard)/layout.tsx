@@ -2,15 +2,25 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { NotificationsBell } from "@/components/notifications-bell";
+import { prisma } from "@/lib/prisma";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const setting = await prisma.setting.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: { id: "singleton" },
+  });
+
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar
+        siteName={setting.siteName}
+        logoDataUrl={setting.logoDataUrl}
+      />
       <SidebarInset>
         <header className="flex h-14 items-center gap-2 border-b border-black/[0.06] bg-white/70 px-4 backdrop-blur-xl">
           <SidebarTrigger />
