@@ -1,10 +1,12 @@
 "use client";
 
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { updateNotificationPreferences } from "@/lib/actions/notification-preferences";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -81,14 +83,22 @@ const CHANNEL_FIELDS: {
 ];
 
 export function PreferencesForm({ defaultValues }: PreferencesFormProps) {
+  const [isPending, startTransition] = useTransition();
   const form = useForm<NotificationPreferencesInput>({
     resolver: zodResolver(notificationPreferencesSchema),
     defaultValues,
   });
 
   function onSubmit(values: NotificationPreferencesInput) {
-    toast.success("Preferences saved (UI only — backend pending)");
-    form.reset(values);
+    startTransition(async () => {
+      const result = await updateNotificationPreferences(values);
+      if (result.success) {
+        toast.success("Preferences saved");
+        form.reset(values);
+      } else {
+        toast.error(result.error);
+      }
+    });
   }
 
   return (
@@ -165,10 +175,10 @@ export function PreferencesForm({ defaultValues }: PreferencesFormProps) {
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={!form.formState.isDirty}
+            disabled={!form.formState.isDirty || isPending}
             className="rounded-xl bg-[#c80000] px-5 py-2 text-white hover:bg-[#b10000] active:bg-[#7b0000]"
           >
-            Save preferences
+            {isPending ? "Saving..." : "Save preferences"}
           </Button>
         </div>
       </form>

@@ -1,6 +1,9 @@
+import { getNotificationPreferences } from "@/lib/actions/notification-preferences";
 import { PreferencesForm } from "./_components/preferences-form";
 
-export default function NotificationsPreferencesPage() {
+export default async function NotificationsPreferencesPage() {
+  const defaultValues = await getNotificationPreferences();
+
   return (
     <div className="rounded-3xl border border-white/80 bg-white/70 p-6 shadow-xl shadow-black/[0.08] backdrop-blur-xl">
       <div className="mb-6 space-y-1">
@@ -11,16 +14,7 @@ export default function NotificationsPreferencesPage() {
           Choose which notifications you want to receive and how.
         </p>
       </div>
-      <PreferencesForm
-        defaultValues={{
-          system: true,
-          security: true,
-          maintenance: true,
-          warranty: true,
-          inApp: true,
-          email: false,
-        }}
-      />
+      <PreferencesForm defaultValues={defaultValues} />
     </div>
   );
 }

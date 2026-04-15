@@ -32,6 +32,7 @@ export async function updateSettings(
       notificationsEnabled: data.notificationsEnabled,
       smtpHost: data.smtpHost ? data.smtpHost : null,
       smtpFromAddress: data.smtpFromAddress ? data.smtpFromAddress : null,
+      logoDataUrl: data.logoDataUrl ? data.logoDataUrl : null,
     },
   });
 

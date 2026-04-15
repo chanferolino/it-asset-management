@@ -56,6 +56,65 @@ export function SettingsForm({ defaultValues }: SettingsFormProps) {
       >
         <FormField
           control={form.control}
+          name="logoDataUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Site logo</FormLabel>
+              <div className="flex items-center gap-4">
+                {field.value ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={field.value}
+                    alt="Logo preview"
+                    className="h-12 w-12 rounded-lg border border-[#e0e0e0] bg-white object-contain p-1"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-[#e0e0e0] bg-white/60 text-xs text-[#bbbbbb]">
+                    none
+                  </div>
+                )}
+                <div className="flex flex-col gap-2">
+                  <FormControl>
+                    <Input
+                      type="file"
+                      accept="image/png,image/jpeg,image/svg+xml,image/webp,image/gif,image/x-icon"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 500_000) {
+                          toast.error("Image too large. Please use an image under 500 KB.");
+                          e.target.value = "";
+                          return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = () => {
+                          field.onChange(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }}
+                    />
+                  </FormControl>
+                  {field.value && (
+                    <button
+                      type="button"
+                      onClick={() => field.onChange("")}
+                      className="cursor-pointer self-start text-xs text-[#7b0000] hover:text-[#c80000]"
+                    >
+                      Remove logo
+                    </button>
+                  )}
+                </div>
+              </div>
+              <FormDescription>
+                Shown in the sidebar and used as the browser favicon. PNG/SVG recommended. Max 500 KB.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="siteName"
           render={({ field }) => (
             <FormItem>

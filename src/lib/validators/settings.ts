@@ -25,6 +25,15 @@ export const settingsSchema = z.object({
     .email("Must be a valid email address")
     .optional()
     .or(z.literal("")),
+  logoDataUrl: z
+    .string()
+    .max(700_000, "Logo image is too large (max ~500 KB)")
+    .refine(
+      (v) => v === "" || /^data:image\/(png|jpeg|jpg|svg\+xml|webp|gif|x-icon|vnd\.microsoft\.icon);base64,/.test(v),
+      "Logo must be a PNG, JPG, SVG, WEBP, GIF, or ICO image",
+    )
+    .optional()
+    .or(z.literal("")),
 });
 
 export type SettingsInput = z.infer<typeof settingsSchema>;

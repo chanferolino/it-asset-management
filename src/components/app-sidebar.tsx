@@ -43,13 +43,31 @@ const navItems = [
   { title: "Notifications", href: "/notifications", icon: Bell },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  siteName: string;
+  logoDataUrl: string | null;
+}
+
+export function AppSidebar({ siteName, logoDataUrl }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
     <Sidebar className="border-r border-black/[0.06] bg-white/70 backdrop-blur-xl">
-      <SidebarHeader className="border-b border-black/[0.06] px-4 py-3">
-        <span className="text-lg font-bold tracking-tight text-[#300000]">IT Assets</span>
+      <SidebarHeader className="border-b border-black/[0.06] px-4 py-4">
+        <div className="flex items-center justify-center">
+          {logoDataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoDataUrl}
+              alt={siteName}
+              className="h-16 w-auto max-w-full object-contain"
+            />
+          ) : (
+            <span className="text-lg font-bold tracking-tight text-[#300000]">
+              {siteName}
+            </span>
+          )}
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
