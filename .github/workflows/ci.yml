@@ -78,7 +78,7 @@ jobs:
     name: Migrate Production DB
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [typecheck, lint, test, build]
+    needs: [typecheck, lint, test]
     env:
       DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
     steps:
