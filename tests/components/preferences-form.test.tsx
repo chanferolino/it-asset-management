@@ -1,16 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-const { toastSuccessMock, toastErrorMock } = vi.hoisted(() => ({
-  toastSuccessMock: vi.fn(),
-  toastErrorMock: vi.fn(),
-}));
+const { toastSuccessMock, toastErrorMock, updatePrefsMock } = vi.hoisted(
+  () => ({
+    toastSuccessMock: vi.fn(),
+    toastErrorMock: vi.fn(),
+    updatePrefsMock: vi.fn().mockResolvedValue({ success: true }),
+  })
+);
 
 vi.mock("sonner", () => ({
   toast: {
     success: toastSuccessMock,
     error: toastErrorMock,
   },
+}));
+
+vi.mock("@/lib/actions/notification-preferences", () => ({
+  updateNotificationPreferences: updatePrefsMock,
 }));
 
 import {
@@ -37,6 +44,7 @@ describe("PreferencesForm", () => {
   beforeEach(() => {
     toastSuccessMock.mockReset();
     toastErrorMock.mockReset();
+    updatePrefsMock.mockReset().mockResolvedValue({ success: true });
   });
 
   it("renders six switches for the four categories and two delivery channels", () => {
@@ -66,7 +74,7 @@ describe("PreferencesForm", () => {
     });
   });
 
-  it("shows a UI-only success toast on submit and resets dirty state", async () => {
+  it("shows a success toast on submit and resets dirty state", async () => {
     renderForm();
 
     const switches = screen.getAllByRole("switch");
@@ -75,9 +83,7 @@ describe("PreferencesForm", () => {
     fireEvent.submit(screen.getByTestId("preferences-form"));
 
     await waitFor(() => {
-      expect(toastSuccessMock).toHaveBeenCalledWith(
-        "Preferences saved (UI only — backend pending)"
-      );
+      expect(toastSuccessMock).toHaveBeenCalledWith("Preferences saved");
     });
 
     await waitFor(() => {
