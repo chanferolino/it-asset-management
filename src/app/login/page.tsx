@@ -39,6 +39,20 @@ export default async function LoginPage() {
           <LoginForm />
         </CardContent>
       </Card>
+
+      <div className="mt-4 w-full max-w-sm rounded-2xl border border-white/80 bg-white/40 p-4 backdrop-blur-sm">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#555555]">
+          Demo credentials
+        </p>
+        <div className="space-y-1 text-sm text-[#888888]">
+          <p>
+            <span className="text-[#555555]">Email:</span> admin@company.com
+          </p>
+          <p>
+            <span className="text-[#555555]">Password:</span> admin123
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
